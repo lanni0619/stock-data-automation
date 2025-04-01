@@ -67,8 +67,9 @@ def notify_discord_webhook():
             print(f"Request failed with response: {res.status_code}-{res.text}")
 
 def save_to_logFile(info, stock_number):
-    root_path = sys.path[0]
-    file_path = os.path.join(root_path, "log", f"{stock_number}-file.txt")
+    root_path = "C:/temp/stock-log"
+
+    file_path = os.path.join(root_path, f"{stock_number}-file.txt")
     with open(file_path, 'a') as file:
          file.write('Date: ' + info.date + '\n')
          file.write('balance_yest: ' + info.balance_yest + '\n')
@@ -78,8 +79,8 @@ def save_to_logFile(info, stock_number):
 
 def save_to_excel(info, stock_number):
     today = datetime.today()
-    root_path = sys.path[0]
-    filename = os.path.join(root_path, "log", f"{stock_number}_{today.strftime('%Y-%m')}.xlsx")
+    root_path = "C:/temp/stock-log"
+    filename = os.path.join(root_path, f"{stock_number}_{today.strftime('%Y-%m')}.xlsx")
     new_entry = {
     "date": info.date,
     "balance_yest": int(info.balance_yest.replace(",", "")),
