@@ -25,23 +25,20 @@ class CreditLine:
 
 def crawl_2317():
     url = 'https://www.twse.com.tw/rwd/zh/marginTrading/TWT93U?response=html'
-    try:
-        web = requests.get(url)
-        soup = BeautifulSoup(web.text, "html5lib")
-        stocks = soup.find_all('tr', attrs={"align":"center", "style":"font-size:14px;"})
-        for stock in stocks:
-            if stock.find('td').get_text() == "2317":
-                stock_2317 = stock.find_all('td')
+    web = requests.get(url)
+    soup = BeautifulSoup(web.text, "html5lib")
+    stocks = soup.find_all('tr', attrs={"align":"center", "style":"font-size:14px;"})
+    for stock in stocks:
+        if stock.find('td').get_text() == "2317":
+            stock_2317 = stock.find_all('td')
 
-                balance_yest = stock_2317[8].get_text()  # 前日餘額
-                selling_today = stock_2317[9].get_text() # 當日賣出
-                return_today = stock_2317[10].get_text()  # 當日還券
-                balance_today = stock_2317[12].get_text() # 今日餘額
+            balance_yest = stock_2317[8].get_text()  # 前日餘額
+            selling_today = stock_2317[9].get_text() # 當日賣出
+            return_today = stock_2317[10].get_text()  # 當日還券
+            balance_today = stock_2317[12].get_text() # 今日餘額
 
-                creditLine_2317 = CreditLine(balance_yest, selling_today, return_today, balance_today)
-                return creditLine_2317.toJson()
-    except:
-        pass
+            creditLine_2317 = CreditLine(balance_yest, selling_today, return_today, balance_today)
+            return creditLine_2317.toJson()
 
 def notify_discord_webhook():
     info = crawl_2317()
@@ -61,8 +58,9 @@ def main():
     #  Non blocking Schedule
     scheduler.add_job(notify_discord_webhook, 'cron', day_of_week='1-5', hour=21, minute=00, second=00)
     scheduler.start()
-    print('Schedule started ... - 21:00')
+    print('Schedule at 21:00 every Monday to Friday ...')
     
+    # Let process non-stop
     cmdInput = None
     while cmdInput != "exit":
         print('Process is running ...')
