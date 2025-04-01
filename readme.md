@@ -7,3 +7,11 @@
 
 #### Schedule
 - https://hackmd.io/@aaronlife/python-topic-scheduler
+
+#### selenium
+- https://www.youtube.com/watch?v=NB8OceGZGjA
+- https://steam.oxxostudio.tw/category/python/spider/selenium.html
+
+
+#### webdriver
+- https://googlechromelabs.github.io/chrome-for-testing/#stable

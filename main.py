@@ -1,9 +1,13 @@
 import requests
 from bs4 import BeautifulSoup
-import json
-import time
 from apscheduler.schedulers.background import BackgroundScheduler
+import pandas as pd
+
+import json
 from datetime import datetime
+import os
+import sys
+import time
 
 scheduler = BackgroundScheduler(timezone="Asia/Shanghai")
 
@@ -40,21 +44,59 @@ def crawl_2317():
             balance_today = stock_2317[12].get_text() # 今日餘額
 
             creditLine_2317 = CreditLine(date, balance_yest, selling_today, return_today, balance_today)
-            return creditLine_2317.toJson()
+            return creditLine_2317
 
 def notify_discord_webhook():
+    # Preliminary
     info = crawl_2317()
+    info_json = info.toJson()
     url = "https://discord.com/api/webhooks/1356484738029719573/9GNCPHfl7gcz9BpkkO1xYEYqZ9_D2tWd0dx5sZqx3RTN3HgLFLql47TEgWYEsz0Q4x8g"   
     headers = {"Content-Type": "application/json"}
-    data = {"content": info, "username": "newmanBot"}
+    data = {"content": info_json, "username": "newmanBot"}
 
+    # Write to log
+    save_to_excel(info, 2317)
+
+    # Send data to discord
     res = requests.post(url, headers = headers, json = data)
     
+    # Read the response
     if res.status_code in (200, 204):
             print(f"Request fulfilled with response code {res.status_code}")
     else:
-            print(f"Request failed with response: {res.status_code}-{res.text}")\
+            print(f"Request failed with response: {res.status_code}-{res.text}")
 
+def save_to_logFile(info, stock_number):
+    root_path = sys.path[0]
+    file_path = os.path.join(root_path, "log", f"{stock_number}-file.txt")
+    with open(file_path, 'a') as file:
+         file.write('Date: ' + info.date + '\n')
+         file.write('balance_yest: ' + info.balance_yest + '\n')
+         file.write('selling_today: ' + info.selling_today + '\n')
+         file.write('return_today: ' + info.return_today + '\n')
+         file.write('balance_today: ' + info.balance_today + '\n')
+
+def save_to_excel(info, stock_number):
+    today = datetime.today()
+    root_path = sys.path[0]
+    filename = os.path.join(root_path, "log", f"{stock_number}_{today.strftime('%Y-%m')}.xlsx")
+    new_entry = {
+    "date": info.date,
+    "balance_yest": int(info.balance_yest.replace(",", "")),
+    "balance_today": int(info.balance_today.replace(",", "")),
+    "return_today": int(info.return_today.replace(",", "")),
+    "balance_today": int(info.balance_today.replace(",", "")),
+    }
+
+    # 檢查檔案是否存在
+    if os.path.exists(filename):
+        df = pd.read_excel(filename)
+        df = pd.concat([df, pd.DataFrame([new_entry])], ignore_index=True)
+    else:
+        df = pd.DataFrame([new_entry])
+
+    df.to_excel(filename, index=False)
+    print(f"✅ {info.date} 紀錄已存入 {filename}")
 
 def main(): 
     #  Non blocking Schedule
@@ -64,7 +106,7 @@ def main():
     
     # Let process non-stop
     cmdInput = None
-    while cmdInput != "exit":
+    while cmdInput != "0":
         print('Process is running ...')
         cmdInput = input("Command: ")
         if cmdInput == str(1):
