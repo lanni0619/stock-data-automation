@@ -8,7 +8,8 @@ from datetime import datetime
 scheduler = BackgroundScheduler(timezone="Asia/Shanghai")
 
 class CreditLine:
-    def __init__(self, balance_yest, selling_today, return_today, balance_today):
+    def __init__(self, date, balance_yest, selling_today, return_today, balance_today):
+        self.date = date
         self.balance_yest = balance_yest
         self.selling_today = selling_today
         self.return_today = return_today
@@ -19,7 +20,7 @@ class CreditLine:
          return json.dumps(
               self,
               default=lambda o: o.__dict__,
-              sort_keys=True,
+              sort_keys=False,
               indent=4
          )
 
@@ -32,12 +33,13 @@ def crawl_2317():
         if stock.find('td').get_text() == "2317":
             stock_2317 = stock.find_all('td')
 
+            date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             balance_yest = stock_2317[8].get_text()  # 前日餘額
             selling_today = stock_2317[9].get_text() # 當日賣出
             return_today = stock_2317[10].get_text()  # 當日還券
             balance_today = stock_2317[12].get_text() # 今日餘額
 
-            creditLine_2317 = CreditLine(balance_yest, selling_today, return_today, balance_today)
+            creditLine_2317 = CreditLine(date, balance_yest, selling_today, return_today, balance_today)
             return creditLine_2317.toJson()
 
 def notify_discord_webhook():
@@ -65,6 +67,8 @@ def main():
     while cmdInput != "exit":
         print('Process is running ...')
         cmdInput = input("Command: ")
+        if cmdInput == str(1):
+            notify_discord_webhook()
 
 if __name__ == "__main__":
      main()
