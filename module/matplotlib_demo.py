@@ -27,12 +27,12 @@ def plot_short_selling(stock_number):
     # 繪製圖表
     plt.figure(figsize=(10, 5))
     for i, data in enumerate(data_series):
-        label = "unit - lot/10" if i == 0 else "unit - NTD"
+        label = "unit - 1k lot" if i == 0 else "unit - NTD"
         plt.plot(date_time, data, label=label)
 
     plt.xlabel("date")
     plt.ylabel("shares")
-    plt.title(f"{stock_number} - Short selling")
+    plt.title(f"{stock_number} - Relationship between price & short selling")
     plt.legend()
     plt.xticks(rotation=45)
     plt.grid()
