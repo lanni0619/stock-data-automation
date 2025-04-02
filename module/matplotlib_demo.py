@@ -12,7 +12,7 @@ def plot_short_selling(stock_number):
 
     # 讀取資料（假設第一列是標題，數據從第二列開始）
     date_time = []
-    data_series = [[] for _ in range(1)]  # 假設有 1 個數據欄位，在陣列中創造1個空陣列
+    data_series = [[] for _ in range(2)]  # 假設有 2 個數據欄位，在陣列中創造 2 個空陣列
 
     # Excel的每一列數據會存在ws.iter_rows，將時間拿出來存在date_time陣列，其他資料放在data_series
     for row in ws.iter_rows(min_row=2, values_only=True):
@@ -21,12 +21,14 @@ def plot_short_selling(stock_number):
         month_day = date_obj.strftime("%m-%d")
 
         date_time.append(month_day)
-        data_series[0].append(row[4])  # 第四攔數據是借券賣出餘額
+        data_series[0].append(float(row[4]/1000/1000))  # 第四欄數據是借券賣出餘額
+        data_series[1].append(row[5])  # 第五欄數據是股價
 
     # 繪製圖表
     plt.figure(figsize=(10, 5))
     for i, data in enumerate(data_series):
-        plt.plot(date_time, data, label=f"balance")
+        label = "unit - lot/10" if i == 0 else "unit - NTD"
+        plt.plot(date_time, data, label=label)
 
     plt.xlabel("date")
     plt.ylabel("shares")

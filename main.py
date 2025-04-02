@@ -17,12 +17,13 @@ from module.matplotlib_demo import plot_short_selling
 info_2317 = None
 
 class CreditLine:
-    def __init__(self, date, balance_yest, selling_today, return_today, balance_today):
+    def __init__(self, date, balance_yest, selling_today, return_today, balance_today, price):
         self.date = date
         self.balance_yest = balance_yest
         self.selling_today = selling_today
         self.return_today = return_today
         self.balance_today = balance_today
+        self.price = price
         self.unit = "share"
     def toJson(self):
         #  https://stackoverflow.com/questions/7408647/convert-dynamic-python-object-to-json
@@ -35,21 +36,31 @@ class CreditLine:
 
 def crawl_2317():
     global info_2317
-    url = 'https://www.twse.com.tw/rwd/zh/marginTrading/TWT93U?response=html'
-    web = requests.get(url)
-    soup = BeautifulSoup(web.text, "html5lib")
-    stocks = soup.find_all('tr', attrs={"align":"center", "style":"font-size:14px;"})
-    for stock in stocks:
-        if stock.find('td').get_text() == "2317":
-            stock_2317 = stock.find_all('td')
+    short_selling_url = 'https://www.twse.com.tw/rwd/zh/marginTrading/TWT93U?response=html'
+    price_url = "https://tw.stock.yahoo.com/quote/2317.TW"
+
+    web1 = requests.get(short_selling_url)
+    web2 = requests.get(price_url)
+
+    soup1 = BeautifulSoup(web1.text, "html5lib")
+    soup2 = BeautifulSoup(web2.text, "html5lib")
+
+    data_array1 = soup1.find_all('tr', attrs={"align":"center", "style":"font-size:14px;"})
+    data2 = soup2.find('span', class_="Fz(32px) Fw(b) Lh(1) Mend(16px) D(f) Ai(c) C($c-trend-up)")
+    
+    for short_selling in data_array1:
+        if short_selling.find('td').get_text() == "2317":
+            stock_2317 = short_selling.find_all('td')
 
             date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             balance_yest = stock_2317[8].get_text()  # 前日餘額
             selling_today = stock_2317[9].get_text() # 當日賣出
             return_today = stock_2317[10].get_text()  # 當日還券
             balance_today = stock_2317[12].get_text() # 今日餘額
+            price = data2.get_text()
 
-            info_2317 = CreditLine(date, balance_yest, selling_today, return_today, balance_today)
+            info_2317 = CreditLine(date, balance_yest, selling_today, return_today, balance_today, price)
+            print(info_2317.toJson())
 
 def send_json_discord(info):
     # Preliminary
@@ -123,7 +134,8 @@ def save_to_excel(info, stock_number):
         "balance_yest": int(info.balance_yest.replace(",", "")),
         "selling_today": int(info.selling_today.replace(",", "")),
         "return_today": int(info.return_today.replace(",", "")),
-        "balance_today": int(info.balance_today.replace(",", ""))
+        "balance_today": int(info.balance_today.replace(",", "")),
+        "price": float(info.price.replace(",", ""))
     }
     print(filename)
     # 檢查檔案是否存在
