@@ -1,12 +1,6 @@
 import logging
 import logging.config
 
-logging.basicConfig(
-    filename="log.txt",
-    # filemode='w',
-    encoding='utf-8',
-)
-
 logging.config.dictConfig({
     'version': 1,
     'formatters': { 
@@ -21,17 +15,29 @@ logging.config.dictConfig({
             'formatter': 'standard',
             'level': 'INFO',
         },
+        'file': {
+            'class': 'logging.FileHandler',
+            'formatter': 'standard',
+            'level': 'DEBUG',
+            'filename': 'log.txt',  # Specify the filename here
+            'mode': 'a',  # Specify the file mode here
+        },
     },
     'root': {
-        'handlers': ['console'],
+        'handlers': ['console', 'file'],
         'level': 'DEBUG',
     },
     'loggers': {
         'apscheduler': {
-            'level': 'WARNING',  # 把 apscheduler 壓低
+            'level': 'WARNING',  # lower apscheduler level
             'handlers': [],
             'propagate': False,
         },
+        'matplotlib':{
+            'level': 'WARNING',
+            'handlers': [],
+            'propagate': False,   
+        }
     },
 })
 

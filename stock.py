@@ -2,6 +2,7 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+from apscheduler.schedulers.background import BackgroundScheduler
 
 # Module
 import json
@@ -9,6 +10,7 @@ from datetime import datetime
 import os
 from module.matplotlib_demo import plot_short_selling
 from logger import logging
+
 
 class Stock:
     def __init__(self, stock_code, created_at=None, balance_yest=None, 
@@ -31,8 +33,8 @@ class Stock:
          )
     
     def crawl_info(self):
-        logging.info("crawler function - init")
-
+        logging.info(f"crawler function - {self.stock_code} init")
+        
         short_selling_url = 'https://www.twse.com.tw/rwd/zh/marginTrading/TWT93U?response=html'
         price_url = f"https://tw.stock.yahoo.com/quote/{self.stock_code}.TW"
 
@@ -43,7 +45,13 @@ class Stock:
         soup2 = BeautifulSoup(web2.text, "html5lib")
 
         data_array1 = soup1.find_all('tr', attrs={"align":"center", "style":"font-size:14px;"})
-        data2 = soup2.find('span', class_="Fz(32px) Fw(b) Lh(1) Mend(16px) D(f) Ai(c) C($c-trend-up)")
+        
+        target_classes = [
+            "Fz(32px) Fw(b) Lh(1) Mend(16px) D(f) Ai(c) C($c-trend-up)",
+            "Fz(32px) Fw(b) Lh(1) Mend(16px) D(f) Ai(c) C($c-trend-down)",
+            "Fz(32px) Fw(b) Lh(1) Mend(16px) D(f) Ai(c)"
+        ]
+        data2 = soup2.find('span', class_=lambda x: x and any(cls in x for cls in target_classes))
         price = data2.get_text()
 
         if price:
@@ -68,10 +76,10 @@ class Stock:
         return self
     
     def send_json(self):
-        logging.info(f"send_json_discord - init")
+        logging.info(f"send_json - init - stock_number = {self.stock_code}")
         # Preliminary
         if not all(getattr(self, attr) is not None for attr in vars(self)):
-            logging.error("send_json_discord - data incomplete")
+            logging.error("send_json - data incomplete")
             return
 
         info_json = self.toJson()
@@ -84,9 +92,9 @@ class Stock:
         
         # Read the response
         if res.status_code in (200, 204):
-            logging.info(f"send_json_discord - success ✅")
+            logging.info(f"send_json - success ✅")
         else:
-            logging.error(f"send_json_discord - fail ❌")
+            logging.error(f"send_json - fail ❌")
 
     def save_to_excel(self):
         logging.info(f"save_to_excel - stock_number = {self.stock_code}")
@@ -97,16 +105,17 @@ class Stock:
         filename = os.path.join(root_path, f"{self.stock_code}_{today.strftime('%Y-%m')}.xlsx")
 
         # 2) Check if duplicate records
-        df_tail_array = pd.read_excel(filename).tail(1).to_numpy()[0] # Convert the DataFrame to a NumPy array.
-        properties = ["balance_yest", "selling_today", "return_today", "balance_today", "price"]
-        for i, prop in enumerate(properties):
-            current_value = getattr(self, prop)
-            if current_value is not None: 
-                if str(current_value).replace(",", "") != str(df_tail_array[i + 1]):
-                    logging.info("save_to_excel - Not duplicate record, continue saving data")
-                    break
-            logging.info("save_to_excel - Duplicate record, stop saving data ")
-            return
+        if os.path.exists(filename):
+            df_tail_array = pd.read_excel(filename).tail(1).to_numpy()[0] # Convert the DataFrame to a NumPy array.
+            properties = ["balance_yest", "selling_today", "return_today", "balance_today", "price"]
+            for i, prop in enumerate(properties):
+                current_value = getattr(self, prop)
+                if current_value is not None: 
+                    if str(current_value).replace(",", "") != str(df_tail_array[i + 1]):
+                        logging.info("save_to_excel - Not duplicate record, continue saving data")
+                        break
+                logging.info("save_to_excel - Duplicate record, stop saving data ")
+                return
 
         # 3) build new data frame
         new_entry = {
@@ -131,22 +140,22 @@ class Stock:
 
     def send_chart(self):
         logging.info(f"send_chart - stock_number = {self.stock_code}")
-        # draw new chart
+        # 1) draw new chart
         plot_short_selling(self.stock_code)
 
-        # Path to the JPG file
+        # 2) Path to the JPG file
         today = datetime.today()
         jpg_file_path = f"C:/temp/stock-log/{self.stock_code}_{today.strftime('%Y-%m')}.jpg"  # Replace with your actual file name
 
-        # Discord webhook URL
+        # 3) Discord webhook URL
         url = "https://discord.com/api/webhooks/1356484738029719573/9GNCPHfl7gcz9BpkkO1xYEYqZ9_D2tWd0dx5sZqx3RTN3HgLFLql47TEgWYEsz0Q4x8g"
 
-        # Check if the file exists
+        # 4) Check if the file exists
         if not os.path.exists(jpg_file_path):
             logging.info(f"send_chart - ❌ File not found: {jpg_file_path}")
             return
 
-        # Prepare the file and payload
+        # 5) Prepare the file and payload
         with open(jpg_file_path, "rb") as file:
             files = {"file": (os.path.basename(jpg_file_path), file, "image/jpeg")}
             payload = {"username": "newmanBot"}
@@ -154,8 +163,20 @@ class Stock:
             # Send the request
             res = requests.post(url, data=payload, files=files)
 
-        # Read the response
+        # 6) Read the response
         if res.status_code in (200, 204):
             logging.info(f"send_chart - success ✅")
         else:
             logging.info(f"send_chart - fail ❌")
+
+    def schedule_task(self):
+        logging.info(f"schedule_task - init - stock_number = {self.stock_code}")
+        scheduler = BackgroundScheduler(timezone="Asia/Taipei")
+        hour = 21
+        min = 00
+        sec = (datetime.now().second + 5) % 60
+        scheduler.add_job(self.crawl_info, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=sec)
+        scheduler.add_job(self.save_to_excel, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=(sec + 5) % 60)
+        scheduler.add_job(self.send_json, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=(sec + 10) % 60)
+        scheduler.add_job(self.send_chart, 'cron', day_of_week='fri', hour=hour, minute=min, second=(sec + 15) % 60)
+        scheduler.start()
