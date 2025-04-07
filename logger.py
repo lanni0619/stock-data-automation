@@ -1,44 +1,24 @@
 import logging
-import logging.config
 
-logging.config.dictConfig({
-    'version': 1,
-    'formatters': { 
-        'standard': {
-            'format': '[%(asctime)s,%(msecs)03d][%(levelname)s] %(name)s: %(message)s',
-            'datefmt': '%Y-%m-%d-%H:%M:%S' },
-    },
-    'disable_existing_loggers': True,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'standard',
-            'level': 'INFO',
-        },
-        'file': {
-            'class': 'logging.FileHandler',
-            'formatter': 'standard',
-            'level': 'DEBUG',
-            'filename': 'log.txt',  # Specify the filename here
-            'mode': 'a',  # Specify the file mode here
-        },
-    },
-    'root': {
-        'handlers': ['console', 'file'],
-        'level': 'DEBUG',
-    },
-    'loggers': {
-        'apscheduler': {
-            'level': 'WARNING',  # lower apscheduler level
-            'handlers': [],
-            'propagate': False,
-        },
-        'matplotlib':{
-            'level': 'WARNING',
-            'handlers': [],
-            'propagate': False,   
-        }
-    },
-})
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
-# https://stackoverflow.com/questions/8269294/python-logging-only-log-from-script
+# Create a formatter
+formatter = logging.Formatter(
+    "[%(asctime)s] [%(filename)s] [%(levelname)s]: %(message)s",
+    datefmt='%Y-%m-%d %H:%M:%S'
+    )
+
+# Create a file handler
+file_handler = logging.FileHandler("logfile.log", encoding="utf-8")
+file_handler.setLevel(logging.DEBUG)  # Set the file handler level
+file_handler.setFormatter(formatter)  # Attach the formatter to the file handler
+
+# Create a console handler
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)  # Set the console handler level
+console_handler.setFormatter(formatter)  # Attach the formatter to the console handler
+
+# Add handlers to the logger
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)

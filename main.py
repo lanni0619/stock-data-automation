@@ -2,7 +2,7 @@
 from datetime import datetime
 from threading import Thread
 import time
-from logger import logging
+from logger import logger
 from stock import Stock
 
 def user_input_loop(stocks):
@@ -29,11 +29,15 @@ def user_input_loop(stocks):
             break            
 
 def main():
-    logging.info("Start main ...")
+    logger.info("Start main ...")
 
     # 1) Preliminary
-    stock2317 = Stock(2317).crawl_info()
-    stock2330 = Stock(2330).crawl_info()
+    stock2317 = Stock(2317)
+    stock2330 = Stock(2330)
+    
+    stock2317.crawl_info()
+    stock2330.crawl_info()
+    
     stocks = {2317: stock2317, 2330: stock2330}
 
     # 2) Schedule work
