@@ -32,8 +32,8 @@ def main():
     logging.info("Start main ...")
 
     # 1) Preliminary
-    stock2317 = Stock(2317)
-    stock2330 = Stock(2330)
+    stock2317 = Stock(2317).crawl_info()
+    stock2330 = Stock(2330).crawl_info()
     stocks = {2317: stock2317, 2330: stock2330}
 
     # 2) Schedule work

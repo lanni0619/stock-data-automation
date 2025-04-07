@@ -47,17 +47,19 @@ class Stock:
         data_array1 = soup1.find_all('tr', attrs={"align":"center", "style":"font-size:14px;"})
         
         target_classes = [
-            "Fz(32px) Fw(b) Lh(1) Mend(16px) D(f) Ai(c) C($c-trend-up)",
-            "Fz(32px) Fw(b) Lh(1) Mend(16px) D(f) Ai(c) C($c-trend-down)",
-            "Fz(32px) Fw(b) Lh(1) Mend(16px) D(f) Ai(c)"
+            "Fz(32px) Fw(b) Lh(1) Mend(16px) D(f) Ai(c) C($c-trend-up)", # 漲
+            "Fz(32px) Fw(b) Lh(1) Mend(16px) D(f) Ai(c) C($c-trend-down)", # 跌
+            "Fz(32px) Fw(b) Lh(1) Mend(16px) D(f) Ai(c)", # 平盤
+            "Fz(32px) Fw(b) Lh(1) Mend(16px) C(#fff) Px(6px) Py(2px) Bdrs(4px) Bgc($c-trend-down)", # 跌停
+            "Fz(32px) Fw(b) Lh(1) Mend(16px) C(#fff) Px(6px) Py(2px) Bdrs(4px) Bgc($c-trend-up)", # 漲停
         ]
         data2 = soup2.find('span', class_=lambda x: x and any(cls in x for cls in target_classes))
         price = data2.get_text()
 
         if price:
-            logging.info(f"crawler function - Get price = {price} ✅")
+            logging.info(f"crawler function - Get price = {price}")
         else:
-            logging.error("crawler function - Fail to get price ❌")
+            logging.error("crawler function - Fail to get price")
             return
 
         for short_selling in data_array1:
@@ -69,10 +71,10 @@ class Stock:
                 self.return_today = target_info[10].get_text()  # 當日還券
                 self.balance_today = target_info[12].get_text() # 今日餘額
                 self.price = data2.get_text()    
-                logging.info(f"crawler function - Get short selling info ✅")
+                logging.info(f"crawler function - Get short selling info")
                 return self
         
-        logging.error("crawler function - Fail to get short selling info ❌")
+        logging.error("crawler function - Fail to get short selling info")
         return self
     
     def send_json(self):
@@ -92,9 +94,9 @@ class Stock:
         
         # Read the response
         if res.status_code in (200, 204):
-            logging.info(f"send_json - success ✅")
+            logging.info(f"send_json - success")
         else:
-            logging.error(f"send_json - fail ❌")
+            logging.error(f"send_json - fail")
 
     def save_to_excel(self):
         logging.info(f"save_to_excel - stock_number = {self.stock_code}")
@@ -136,7 +138,7 @@ class Stock:
 
         # 5) Save
         df.to_excel(filename, index=False)
-        logging.info(f"save_to_excel - ✅ {self.created_at} 紀錄已存入 {filename}")
+        logging.info(f"save_to_excel - {self.created_at} 紀錄已存入 {filename}")
 
     def send_chart(self):
         logging.info(f"send_chart - stock_number = {self.stock_code}")
@@ -152,7 +154,7 @@ class Stock:
 
         # 4) Check if the file exists
         if not os.path.exists(jpg_file_path):
-            logging.info(f"send_chart - ❌ File not found: {jpg_file_path}")
+            logging.info(f"send_chart - File not found: {jpg_file_path}")
             return
 
         # 5) Prepare the file and payload
@@ -165,9 +167,9 @@ class Stock:
 
         # 6) Read the response
         if res.status_code in (200, 204):
-            logging.info(f"send_chart - success ✅")
+            logging.info(f"send_chart - success")
         else:
-            logging.info(f"send_chart - fail ❌")
+            logging.info(f"send_chart - fail")
 
     def schedule_task(self):
         logging.info(f"schedule_task - init - stock_number = {self.stock_code}")
