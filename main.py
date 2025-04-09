@@ -50,6 +50,4 @@ def main():
     user_input_loop(stocks)
 
 if __name__ == "__main__":
-    #  main()
-    stock2317 = Stock(2317).crawl_info()
-    stock2317.save_to_excel2()
+     main()

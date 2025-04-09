@@ -116,6 +116,7 @@ class Stock:
         except Exception as e:
             logger.error(f"send_json - unexpected error: {e}")
 
+    # Save by pandas
     def save_to_excel(self):
         try:
             logger.info(f"save_to_excel - stock_number = {self.stock_code}")
@@ -162,6 +163,7 @@ class Stock:
         except Exception as e:
             logger.error(f"save_to_excel - error: {e}")
 
+    # Save by openpyxl
     def save_to_excel2(self):
         try:
             logger.info(f"save_to_excel2 - stock_number = {self.stock_code}")
@@ -252,7 +254,7 @@ class Stock:
         min = 30
         sec = 00
         scheduler.add_job(self.crawl_info, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=sec)
-        scheduler.add_job(self.save_to_excel, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=(sec + 10) % 60)
+        scheduler.add_job(self.save_to_excel2, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=(sec + 10) % 60)
         scheduler.add_job(self.send_json, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=(sec + 20) % 60)
         scheduler.add_job(self.send_chart, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=(sec + 30) % 60)
         scheduler.start()
