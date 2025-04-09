@@ -201,10 +201,10 @@ class Stock:
         logger.info(f"schedule_task - init - stock_number = {self.stock_code}")
         scheduler = BackgroundScheduler(timezone="Asia/Taipei")
         hour = 21
-        min = 00
-        sec = (datetime.now().second + 5) % 60
+        min = 30
+        sec = 00
         scheduler.add_job(self.crawl_info, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=sec)
-        scheduler.add_job(self.save_to_excel, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=(sec + 5) % 60)
-        scheduler.add_job(self.send_json, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=(sec + 10) % 60)
-        scheduler.add_job(self.send_chart, 'cron', day_of_week='fri', hour=hour, minute=min, second=(sec + 15) % 60)
+        scheduler.add_job(self.save_to_excel, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=(sec + 10) % 60)
+        scheduler.add_job(self.send_json, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=(sec + 20) % 60)
+        scheduler.add_job(self.send_chart, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=(sec + 30) % 60)
         scheduler.start()
