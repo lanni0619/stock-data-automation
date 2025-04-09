@@ -170,36 +170,40 @@ class Stock:
             today = datetime.today()
             root_path = "C:/temp/stock-log"
             filename = os.path.join(root_path, f"{self.stock_code}_{today.strftime('%Y-%m')}.xlsx")
+            cols = ["created_at", "balance_yest", "selling_today", "return_today", "balance_today", "price"]
 
             # 2) Check if data exist ?
             if os.path.exists(filename):
+                logger.info(f"save_to_excel2 - file exists")
                 wb = openpyxl.load_workbook(filename, data_only=True) # create work book
                 sheet = wb.active                                     # get first sheet when open the xlsx
-                max_row = sheet.max_row                               # get max_row number
-                str_time = sheet.cell(max_row, 1).value[0:10]         # get last record date (string, yyyy-mm-dd)
-                
-                # 3) Check if data duplicate ?
-                if str_time == today.strftime("%Y-%m-%d"):            # compare with today
-                    logger.info("save_to_excel - Duplicate record, stop saving data ")
-                    return
+                max_row = sheet.max_row
+
+                if max_row != 1:                               # get max_row number
+                    str_time = sheet.cell(max_row, 1).value[0:10]        # get last record date (string, yyyy-mm-dd)           
+                    # 3) Check if data duplicate ?
+                    if str_time == today.strftime("%Y-%m-%d"):            # compare with today
+                        logger.info("save_to_excel - Duplicate record, stop saving data ")
+                        return
 
             # 4) if file not exists
             else:
+                logger.info(f"save_to_excel2 - file not exists")
                 # create new excel file
                 wb = openpyxl.Workbook()
+                sheet = wb.active
+                sheet.append(cols)
                 wb.save(filename)
-                sheet = wb.create_sheet("工作表1")
-                sheet.append(["created_at", "balance_yest", "selling_today", "return_today", "balance_today", "price"])
 
             # 5) build new data
             arr = []
-            for attr in ["created_at", "balance_yest", "selling_today", "return_today", "balance_today", "price"]:
+            for attr in cols:
                 value = getattr(self, attr)
                 if attr != "created_at" and value is not None:
                     arr.append(float(value.replace(",", "")))
                 else:
                     arr.append(value)
-            
+
             sheet.append(arr)
             wb.save(filename)
             
