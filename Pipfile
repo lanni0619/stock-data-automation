@@ -6,12 +6,12 @@ name = "pypi"
 [packages]
 html5lib = "*"
 pandas = "*"
-openpyxl = "*"
 requests = "*"
 beautifulsoup4 = "*"
 apscheduler = "*"
 matplotlib = "*"
 pyinstaller = "*"
+openpyxl = "*"
 
 [dev-packages]
 

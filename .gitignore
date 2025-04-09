@@ -1,6 +1,9 @@
+demo
 build
 dist
 main.
 main.spec
 log.txt
+logfile.log
 __pycache__
+.vscode
