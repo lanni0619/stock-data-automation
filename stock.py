@@ -30,22 +30,13 @@ class Stock:
               sort_keys=False,
               indent=4
          )
-    
-    def crawl_info(self):
-
+    def crawl_price(self):
         try:
-            logger.info(f"crawler function - {self.stock_code} init")
-            short_selling_url = 'https://www.twse.com.tw/rwd/zh/marginTrading/TWT93U?response=html'
-            price_url = f"https://tw.stock.yahoo.com/quote/{self.stock_code}.TW"
+            logger.info(f"crawl_stock_price init - stock_number = {self.stock_code}")
+            url = f"https://tw.stock.yahoo.com/quote/{self.stock_code}.TW"
+            web = requests.get(url)
+            soup = BeautifulSoup(web.text, "html5lib")
 
-            web1 = requests.get(short_selling_url)
-            web2 = requests.get(price_url)
-
-            soup1 = BeautifulSoup(web1.text, "html5lib")
-            soup2 = BeautifulSoup(web2.text, "html5lib")
-
-            data_array1 = soup1.find_all('tr', attrs={"align":"center", "style":"font-size:14px;"})
-            
             target_classes = [
                 "Fz(32px) Fw(b) Lh(1) Mend(16px) D(f) Ai(c) C($c-trend-up)", # 漲
                 "Fz(32px) Fw(b) Lh(1) Mend(16px) D(f) Ai(c) C($c-trend-down)", # 跌
@@ -53,36 +44,53 @@ class Stock:
                 "Fz(32px) Fw(b) Lh(1) Mend(16px) C(#fff) Px(6px) Py(2px) Bdrs(4px) Bgc($c-trend-down)", # 跌停
                 "Fz(32px) Fw(b) Lh(1) Mend(16px) C(#fff) Px(6px) Py(2px) Bdrs(4px) Bgc($c-trend-up)", # 漲停
             ]
-            data2 = soup2.find('span', class_=lambda x: x and any(cls in x for cls in target_classes))
-            price = data2.get_text()
-
+            span_tag = soup.find('span', class_=lambda x: x and any(cls in x for cls in target_classes))
+            price = span_tag.get_text()
+            
             if price:
-                logger.info(f"crawler function - Get price = {price}")
+                logger.info(f"crawl_stock_price - Get price = {price}")
             else:
-                logger.error("crawler function - Fail to get price")
-                return
+                raise Exception(f"Fail to get {self.stock_code} price")
 
-            for short_selling in data_array1:
-                if short_selling.find('td').get_text() == str(self.stock_code):
-                    target_info = short_selling.find_all('td')
+            self.price = price
+            self.created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            return self
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"crawl_stock_price - Network error: {e}")
+        except AttributeError as e:
+            logger.error(f"crawl_stock_price - Parsing error: {e}")
+        except Exception as e:
+            logger.error(f"crawl_stock_price - unexpected error: {e}")
+
+    def crawl_short_selling(self):
+        try:
+            logger.info(f"crawl_short_selling init - stock_number = {self.stock_code}")
+            url = 'https://www.twse.com.tw/rwd/zh/marginTrading/TWT93U?response=html'
+            web = requests.get(url)
+            soup = BeautifulSoup(web.text, "html5lib")
+            trs = soup.find_all('tr', attrs={"align":"center", "style":"font-size:14px;"})
+
+            for tr in trs:
+                if tr.find('td').get_text() == str(self.stock_code):
+                    target_info = tr.find_all('td')
                     self.created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     self.balance_yest = target_info[8].get_text()  # 前日餘額
                     self.selling_today = target_info[9].get_text() # 當日賣出
                     self.return_today = target_info[10].get_text()  # 當日還券
-                    self.balance_today = target_info[12].get_text() # 今日餘額
-                    self.price = data2.get_text()    
-                    logger.info(f"crawler function - Get short selling info")
+                    self.balance_today = target_info[12].get_text() # 今日餘額 
+                    logger.info(f"crawl_short_selling - Get info = {self.__dict__}")
                     return self
-            
-            logger.error("crawler function - Fail to get short selling info")
-            return self
+                
+            raise Exception(f"Could not find {self.stock_code} short_selling info")
         
         except requests.exceptions.RequestException as e:
-            logger.error(f"crawler function - Network error: {e}")
+            logger.error(f"crawl_short_selling - Network error: {e}")
         except AttributeError as e:
-            logger.error(f"crawler function - Parsing error: {e}")
+            logger.error(f"crawl_short_selling - Parsing error: {e}")
         except Exception as e:
-            logger.error(f"crawler function - unexpected error: {e}")
+            logger.error(f"crawl_short_selling - unexpected error: {e}")
     
     def send_json(self):
         try:
@@ -200,12 +208,15 @@ class Stock:
             logger.error(f"save_to_excel - error: {e}")
 
     def schedule_task(self):
-        logger.info(f"schedule_task - init - stock_number = {self.stock_code}")
         scheduler = BackgroundScheduler(timezone="Asia/Taipei")
         hour = 21
         min = 30
         sec = 00
-        scheduler.add_job(self.crawl_info, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=sec)
+
+        logger.info(f"schedule_task init - stock_number = {self.stock_code}, time = {hour}:{min}")
+
+        scheduler.add_job(self.crawl_price, 'cron', day_of_week='mon-fri', hour=(hour - 1), minute=min, second=sec)
+        scheduler.add_job(self.crawl_short_selling, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=sec)
         scheduler.add_job(self.save_to_excel, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=(sec + 10) % 60)
         scheduler.add_job(self.send_json, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=(sec + 20) % 60)
         scheduler.add_job(self.send_chart, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=(sec + 30) % 60)
