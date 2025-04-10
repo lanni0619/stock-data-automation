@@ -1,7 +1,6 @@
 # Package
 import requests
 from bs4 import BeautifulSoup
-import pandas as pd
 from apscheduler.schedulers.background import BackgroundScheduler
 import openpyxl
 
@@ -116,55 +115,8 @@ class Stock:
         except Exception as e:
             logger.error(f"send_json - unexpected error: {e}")
 
-    # Save by pandas
-    def save_to_excel(self):
-        try:
-            logger.info(f"save_to_excel - stock_number = {self.stock_code}")
-
-            # 1) Preliminary
-            today = datetime.today()
-            root_path = "C:/temp/stock-log"
-            filename = os.path.join(root_path, f"{self.stock_code}_{today.strftime('%Y-%m')}.xlsx")
-
-            # 2) Check if duplicate records
-            if os.path.exists(filename):
-                df_tail_array = pd.read_excel(filename).tail(1).to_numpy()[0] # Convert the DataFrame to a NumPy array.
-                properties = ["balance_yest", "selling_today", "return_today", "balance_today", "price"]
-                for i, prop in enumerate(properties):
-                    current_value = getattr(self, prop)
-                    if current_value is not None: 
-                        if str(current_value).replace(",", "") != str(df_tail_array[i + 1]):
-                            logger.info("save_to_excel - Not duplicate record, continue saving data")
-                            break
-                    logger.info("save_to_excel - Duplicate record, stop saving data ")
-                    return
-
-            # 3) build new data frame
-            new_entry = {
-                "date": self.created_at,
-                "balance_yest": int(self.balance_yest.replace(",", "")),
-                "selling_today": int(self.selling_today.replace(",", "")),
-                "return_today": int(self.return_today.replace(",", "")),
-                "balance_today": int(self.balance_today.replace(",", "")),
-                "price": float(self.price.replace(",", ""))
-            }
-
-            # 4) Check if file exists
-            if os.path.exists(filename):
-                df = pd.read_excel(filename)
-                df = pd.concat([df, pd.DataFrame([new_entry])], ignore_index=True)
-            else:
-                df = pd.DataFrame([new_entry])
-
-            # 5) Save
-            df.to_excel(filename, index=False)
-            logger.info(f"save_to_excel - {self.created_at} 紀錄已存入 {filename}")
-        
-        except Exception as e:
-            logger.error(f"save_to_excel - error: {e}")
-
     # Save by openpyxl
-    def save_to_excel2(self):
+    def save_to_excel(self):
         try:
             logger.info(f"save_to_excel2 - stock_number = {self.stock_code}")
 
@@ -176,37 +128,37 @@ class Stock:
 
             # 2) Check if data exist ?
             if os.path.exists(filename):
-                logger.info(f"save_to_excel2 - file exists")
+                logger.info(f"save_to_excel2 - file exists, check if duplicate date of record")
                 wb = openpyxl.load_workbook(filename, data_only=True) # create work book
                 sheet = wb.active                                     # get first sheet when open the xlsx
                 max_row = sheet.max_row
 
-                if max_row != 1:                               # get max_row number
+                if max_row != 1:                                         # get max_row number
                     str_time = sheet.cell(max_row, 1).value[0:10]        # get last record date (string, yyyy-mm-dd)           
                     # 3) Check if data duplicate ?
                     if str_time == today.strftime("%Y-%m-%d"):            # compare with today
-                        logger.info("save_to_excel - Duplicate record, stop saving data ")
+                        logger.info("save_to_excel - Duplicate date of record, stop saving data ")
                         return
 
             # 4) if file not exists
             else:
-                logger.info(f"save_to_excel2 - file not exists")
+                logger.info(f"save_to_excel2 - file not exists, creating ...")
                 # create new excel file
                 wb = openpyxl.Workbook()
                 sheet = wb.active
                 sheet.append(cols)
                 wb.save(filename)
 
-            # 5) build new data
-            arr = []
+            # 5) build new row
+            row_arr = []
             for attr in cols:
                 value = getattr(self, attr)
                 if attr != "created_at" and value is not None:
-                    arr.append(float(value.replace(",", "")))
+                    row_arr.append(float(value.replace(",", "")))
                 else:
-                    arr.append(value)
+                    row_arr.append(value)
 
-            sheet.append(arr)
+            sheet.append(row_arr)
             wb.save(filename)
             
         except Exception as e:
@@ -254,7 +206,7 @@ class Stock:
         min = 30
         sec = 00
         scheduler.add_job(self.crawl_info, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=sec)
-        scheduler.add_job(self.save_to_excel2, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=(sec + 10) % 60)
+        scheduler.add_job(self.save_to_excel, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=(sec + 10) % 60)
         scheduler.add_job(self.send_json, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=(sec + 20) % 60)
         scheduler.add_job(self.send_chart, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=(sec + 30) % 60)
         scheduler.start()

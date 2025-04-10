@@ -7,11 +7,11 @@ from stock import Stock
 
 def user_input_loop(stocks):
     while True:
-        stock_code = int(input("📈 Enter 'stock code' or '0' to leave: "))
+        stock_code = int(input("📈 Enter 'stock code' or '0' to exit: "))
 
         if stock_code == 2317 or stock_code == 2330:
             while True:
-                cmd = input("🔔 1)send_json 2)save_to_excel 3)send_chart 4)Get attribute 0)exit: ")
+                cmd = input("🔔 (1)send_json (2)save_to_excel (3)send_chart (4)Get attribute (0)return: ")
                 if cmd == "1":
                     stocks[stock_code].send_json()
                 elif cmd == "2":
@@ -44,7 +44,7 @@ def main():
     stock2317.schedule_task()
     stock2330.schedule_task()
 
-    time.sleep(1)
+    time.sleep(0.5)
 
     # 3) cli user interface
     user_input_loop(stocks)
