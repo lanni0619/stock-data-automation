@@ -126,7 +126,7 @@ class Stock:
     # Save by openpyxl
     def save_to_excel(self):
         try:
-            logger.info(f"save_to_excel2 - stock_number = {self.stock_code}")
+            logger.info(f"save_to_excel - stock_number = {self.stock_code}")
 
             # 1) Preliminary
             today = datetime.today()
@@ -136,7 +136,7 @@ class Stock:
 
             # 2) Check if data exist ?
             if os.path.exists(filename):
-                logger.info(f"save_to_excel2 - file exists, check if duplicate date of record")
+                logger.info(f"save_to_excel - file exists, check if duplicate date of record")
                 wb = openpyxl.load_workbook(filename, data_only=True) # create work book
                 sheet = wb.active                                     # get first sheet when open the xlsx
                 max_row = sheet.max_row
@@ -150,7 +150,7 @@ class Stock:
 
             # 4) if file not exists
             else:
-                logger.info(f"save_to_excel2 - file not exists, creating ...")
+                logger.info(f"save_to_excel - file not exists, creating ...")
                 # create new excel file
                 wb = openpyxl.Workbook()
                 sheet = wb.active
@@ -168,6 +168,7 @@ class Stock:
 
             sheet.append(row_arr)
             wb.save(filename)
+            logger.info("save_to_excel - finish")
             
         except Exception as e:
             print(e)
