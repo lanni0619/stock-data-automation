@@ -1,13 +1,16 @@
-# Package
+# 3rd party package
 import requests
 from bs4 import BeautifulSoup
 from apscheduler.schedulers.background import BackgroundScheduler
 import openpyxl
 
-# Module
+# Standard module
 import json
 from datetime import datetime
 import os
+import time
+
+# Custom module
 from module.matplotlib_demo import plot_short_selling
 from logger import logger
 
@@ -30,6 +33,16 @@ class Stock:
               sort_keys=False,
               indent=4
          )
+    
+    def tictok(func):
+        def wrapper(*arg, **kwargs): # positio & keyword argument. The prefix star is meaning any number.
+            t1 = time.time()
+            func(*arg, **kwargs)
+            t2 = time.time() - t1
+            logger.info(f"{func.__name__} took {round(t2, 3)} seconds")
+        return wrapper
+
+    @tictok
     def crawl_price(self):
         try:
             logger.info(f"crawl_stock_price init - stock_number = {self.stock_code}")
@@ -64,6 +77,7 @@ class Stock:
         except Exception as e:
             logger.error(f"crawl_stock_price - unexpected error: {e}")
 
+    @tictok
     def crawl_short_selling(self):
         try:
             logger.info(f"crawl_short_selling init - stock_number = {self.stock_code}")
@@ -92,6 +106,7 @@ class Stock:
         except Exception as e:
             logger.error(f"crawl_short_selling - unexpected error: {e}")
     
+    @tictok
     def send_json(self):
         try:
             logger.info(f"send_json - init - stock_number = {self.stock_code}")
@@ -124,6 +139,7 @@ class Stock:
             logger.error(f"send_json - unexpected error: {e}")
 
     # Save by openpyxl
+    @tictok
     def save_to_excel(self):
         try:
             logger.info(f"save_to_excel - stock_number = {self.stock_code}")
@@ -136,7 +152,7 @@ class Stock:
 
             # 2) Check if data exist ?
             if os.path.exists(filename):
-                logger.info(f"save_to_excel - file exists, check if duplicate date of record")
+                logger.info(f"save_to_excel - file exists")
                 wb = openpyxl.load_workbook(filename, data_only=True) # create work book
                 sheet = wb.active                                     # get first sheet when open the xlsx
                 max_row = sheet.max_row
@@ -158,6 +174,7 @@ class Stock:
                 wb.save(filename)
 
             # 5) build new row
+            logger.info(f"save_to_excel - Building new row ...")
             row_arr = []
             for attr in cols:
                 value = getattr(self, attr)
@@ -173,6 +190,7 @@ class Stock:
         except Exception as e:
             print(e)
 
+    @tictok
     def send_chart(self):
         try:
             logger.info(f"send_chart - stock_number = {self.stock_code}")
