@@ -14,39 +14,55 @@ import time
 from module.matplotlib_demo import plot_short_selling
 from logger import logger
 
+def tictok(func):
+    def wrapper(*arg, **kwargs): # positio & keyword argument. The prefix star is meaning any number.
+        t1 = time.time()
+        func(*arg, **kwargs)
+        t2 = time.time() - t1
+        logger.info(f"{func.__name__} took {round(t2, 3)} seconds")
+    return wrapper
+
+def classToJson(obj):
+    #  https://stackoverflow.com/questions/7408647/convert-dynamic-python-object-to-json
+    return json.dumps(
+        obj,
+        default=lambda o: o.__dict__,
+        sort_keys=False,
+        indent=4
+    )
+
 class Stock:
     def __init__(self, stock_code, created_at=None, balance_yest=None, 
                  selling_today=None, return_today=None, balance_today=None, price=None):
-        self.stock_code = stock_code
-        self.created_at = created_at
-        self.balance_yest = balance_yest
-        self.selling_today = selling_today
-        self.return_today = return_today
-        self.balance_today = balance_today
-        self.price = price
+        self._stock_code = stock_code
+        self._created_at = created_at
+        self._balance_yest = balance_yest
+        self._selling_today = selling_today
+        self._return_today = return_today
+        self._balance_today = balance_today
+        self._price = price
     
-    def toJson(self):
-        #  https://stackoverflow.com/questions/7408647/convert-dynamic-python-object-to-json
-         return json.dumps(
-              self,
-              default=lambda o: o.__dict__,
-              sort_keys=False,
-              indent=4
-         )
+    @property
+    def stock_code(self):
+        return self._stock_code
     
-    def tictok(func):
-        def wrapper(*arg, **kwargs): # positio & keyword argument. The prefix star is meaning any number.
-            t1 = time.time()
-            func(*arg, **kwargs)
-            t2 = time.time() - t1
-            logger.info(f"{func.__name__} took {round(t2, 3)} seconds")
-        return wrapper
+    @stock_code.setter
+    def stock_code(self, value):
+        if value != self.stock_code:
+            logger.error(f"Class stock{self._stock_code} - Can not modify the stock_code property")
+        else:
+            self._stock_code = value
 
+    @stock_code.deleter
+    def stock_code(self):
+        # del self._stock_code
+        pass
+    
     @tictok
     def crawl_price(self):
         try:
-            logger.info(f"crawl_stock_price init - stock_number = {self.stock_code}")
-            url = f"https://tw.stock.yahoo.com/quote/{self.stock_code}.TW"
+            logger.info(f"crawl_stock_price init - stock_number = {self._stock_code}")
+            url = f"https://tw.stock.yahoo.com/quote/{self._stock_code}.TW"
             web = requests.get(url)
             soup = BeautifulSoup(web.text, "html5lib")
 
@@ -63,10 +79,10 @@ class Stock:
             if price:
                 logger.info(f"crawl_stock_price - Get price = {price}")
             else:
-                raise Exception(f"Fail to get {self.stock_code} price")
+                raise Exception(f"Fail to get {self._stock_code} price")
 
-            self.price = price
-            self.created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            self._price = price
+            self._created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             
             return self
 
@@ -80,24 +96,24 @@ class Stock:
     @tictok
     def crawl_short_selling(self):
         try:
-            logger.info(f"crawl_short_selling init - stock_number = {self.stock_code}")
+            logger.info(f"crawl_short_selling init - stock_number = {self._stock_code}")
             url = 'https://www.twse.com.tw/rwd/zh/marginTrading/TWT93U?response=html'
             web = requests.get(url)
             soup = BeautifulSoup(web.text, "html5lib")
             trs = soup.find_all('tr', attrs={"align":"center", "style":"font-size:14px;"})
 
             for tr in trs:
-                if tr.find('td').get_text() == str(self.stock_code):
+                if tr.find('td').get_text() == str(self._stock_code):
                     target_info = tr.find_all('td')
-                    self.created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    self.balance_yest = target_info[8].get_text()  # 前日餘額
-                    self.selling_today = target_info[9].get_text() # 當日賣出
-                    self.return_today = target_info[10].get_text()  # 當日還券
-                    self.balance_today = target_info[12].get_text() # 今日餘額 
+                    self._created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    self._balance_yest = target_info[8].get_text()  # 前日餘額
+                    self._selling_today = target_info[9].get_text() # 當日賣出
+                    self._return_today = target_info[10].get_text()  # 當日還券
+                    self._balance_today = target_info[12].get_text() # 今日餘額 
                     logger.info(f"crawl_short_selling - Get info = {self.__dict__}")
                     return self
                 
-            raise Exception(f"Could not find {self.stock_code} short_selling info")
+            raise Exception(f"Could not find {self._stock_code} short_selling info")
         
         except requests.exceptions.RequestException as e:
             logger.error(f"crawl_short_selling - Network error: {e}")
@@ -109,13 +125,13 @@ class Stock:
     @tictok
     def send_json(self):
         try:
-            logger.info(f"send_json - init - stock_number = {self.stock_code}")
+            logger.info(f"send_json - init - stock_number = {self._stock_code}")
             # Preliminary
             if not all(getattr(self, attr) is not None for attr in vars(self)):
                 logger.error("send_json - data incomplete")
                 return
 
-            info_json = self.toJson()
+            info_json = classToJson(self)
             url = "https://discord.com/api/webhooks/1356484738029719573/9GNCPHfl7gcz9BpkkO1xYEYqZ9_D2tWd0dx5sZqx3RTN3HgLFLql47TEgWYEsz0Q4x8g"   
             headers = {"Content-Type": "application/json"}
             data = {"content": info_json, "username": "newmanBot"}
@@ -142,12 +158,12 @@ class Stock:
     @tictok
     def save_to_excel(self):
         try:
-            logger.info(f"save_to_excel - stock_number = {self.stock_code}")
+            logger.info(f"save_to_excel - stock_number = {self._stock_code}")
 
             # 1) Preliminary
             today = datetime.today()
             root_path = "C:/temp/stock-log"
-            filename = os.path.join(root_path, f"{self.stock_code}_{today.strftime('%Y-%m')}.xlsx")
+            filename = os.path.join(root_path, f"{self._stock_code}_{today.strftime('%Y-%m')}.xlsx")
             cols = ["created_at", "balance_yest", "selling_today", "return_today", "balance_today", "price"]
 
             # 2) Check if data exist ?
@@ -193,13 +209,13 @@ class Stock:
     @tictok
     def send_chart(self):
         try:
-            logger.info(f"send_chart - stock_number = {self.stock_code}")
+            logger.info(f"send_chart - stock_number = {self._stock_code}")
             # 1) draw new chart
-            plot_short_selling(self.stock_code)
+            plot_short_selling(self._stock_code)
 
             # 2) Path to the JPG file
             today = datetime.today()
-            jpg_file_path = f"C:/temp/stock-log/{self.stock_code}_{today.strftime('%Y-%m')}.jpg"  # Replace with your actual file name
+            jpg_file_path = f"C:/temp/stock-log/{self._stock_code}_{today.strftime('%Y-%m')}.jpg"  # Replace with your actual file name
 
             # 3) Discord webhook URL
             url = "https://discord.com/api/webhooks/1356484738029719573/9GNCPHfl7gcz9BpkkO1xYEYqZ9_D2tWd0dx5sZqx3RTN3HgLFLql47TEgWYEsz0Q4x8g"
@@ -232,7 +248,7 @@ class Stock:
         min = 30
         sec = 00
 
-        logger.info(f"schedule_task init - stock_number = {self.stock_code}, time = {hour}:{min}")
+        logger.info(f"schedule_task init - stock_number = {self._stock_code}, time = {hour}:{min}")
 
         scheduler.add_job(self.crawl_price, 'cron', day_of_week='mon-fri', hour=(hour - 1), minute=min, second=sec)
         scheduler.add_job(self.crawl_short_selling, 'cron', day_of_week='mon-fri', hour=hour, minute=min, second=sec)

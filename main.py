@@ -36,7 +36,7 @@ def main():
     # 1) Preliminary
     stock2317 = Stock(2317)
     stock2330 = Stock(2330)
-    
+
     stock2317.crawl_price()
     stock2330.crawl_price()
     
