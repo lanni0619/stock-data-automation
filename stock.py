@@ -186,12 +186,6 @@ class Stock:
             # 2) Check if data exist ?
             if os.path.exists(filename):
                 logger.info(f"save_to_excel - file exists")
-                # Create work book
-                # wb:Workbook = openpyxl.load_workbook(filename, data_only=True)
-
-                # Get first sheet when open the xlsx
-                # sheet:Worksheet = cast(Worksheet, wb.active)
-
                 # Get max_row number which is the index of latest record
                 max_row:int = sheet.max_row
                 if max_row != 1:
@@ -207,9 +201,6 @@ class Stock:
             # 4) if file not exists
             else:
                 logger.info(f"save_to_excel - file not exists, creating ...")
-
-                # create new Excel file
-                # sheet:Worksheet = cast(Worksheet, wb.active)
                 sheet.append(attrs)
                 wb.save(filename)
 
