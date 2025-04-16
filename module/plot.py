@@ -1,28 +1,36 @@
-import openpyxl
-import matplotlib
-import matplotlib.pyplot as plt
+# Build-in module
 from datetime import datetime
 from os import path
 from threading import Lock
+from typing import cast, Generator
+
+# 3rd-party package
+import openpyxl
+import matplotlib # type: ignore
+import matplotlib.pyplot as plt # type: ignore
+from openpyxl.workbook import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
 
 matplotlib.use("Agg")
 
 plot_lock = Lock()
 
-def plot_short_selling(stock_number):
+def plot_short_selling(stock_number: int) -> None:
     with plot_lock:
-        today = datetime.today()
+        today:datetime = datetime.today()
 
         # 讀取 Excel 檔案
-        wb = openpyxl.load_workbook(f"C:/temp/stock-log/{stock_number}_{today.strftime('%Y-%m')}.xlsx")
-        ws = wb.active
+        wb:Workbook = openpyxl.load_workbook(f"C:/temp/stock-log/{stock_number}_{today.strftime('%Y-%m')}.xlsx")
+        ws:Worksheet = cast(Worksheet, wb.active)
 
         # 讀取資料（假設第一列是標題，數據從第二列開始）
-        date_time = []
-        data_series = [[] for _ in range(2)]  # 假設有 2 個數據欄位，在陣列中創造 2 個空陣列
+        date_time:list = []
+        data_series:list[list] = [[] for _ in range(2)]  # 假設有 2 個數據欄位，在陣列中創造 2 個空陣列
 
         # Excel的每一列數據會存在ws.iter_rows，將時間拿出來存在date_time陣列，其他資料放在data_series
-        for row in ws.iter_rows(min_row=2, values_only=True):
+        ws_rows:Generator = ws.iter_rows(min_row=2, values_only=True)
+
+        for row in ws_rows:
             # Convert y-m-d H:M:S to m-d
             date_obj = datetime.strptime(str(row[0]), "%Y-%m-%d %H:%M:%S")
             month_day = date_obj.strftime("%m-%d")

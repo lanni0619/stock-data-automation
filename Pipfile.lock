@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "c554b13762e661e3879506c1771a4f3bc258b942a9bf60351a861fb02efb28e3"
+            "sha256": "dea141b8046a20a0261e118b65361cfe79f91503290a8d0e4fd37e43072993d6"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -832,5 +832,49 @@
             "version": "==3.21.0"
         }
     },
-    "develop": {}
+    "develop": {
+        "types-beautifulsoup4": {
+            "hashes": [
+                "sha256:57ce9e75717b63c390fd789c787d267a67eb01fa6d800a03b9bdde2e877ed1eb",
+                "sha256:f083d8edcbd01279f8c3995b56cfff2d01f1bb894c3b502ba118d36fbbc495bf"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.9'",
+            "version": "==4.12.0.20250204"
+        },
+        "types-html5lib": {
+            "hashes": [
+                "sha256:3f1e064d9ed2c289001ae6392c84c93833abb0816165c6ff0abfc304a779f403",
+                "sha256:98042555ff78d9e3a51c77c918b1041acbb7eb6c405408d8a9e150ff5beccafa"
+            ],
+            "markers": "python_version >= '3.8'",
+            "version": "==1.1.11.20241018"
+        },
+        "types-openpyxl": {
+            "hashes": [
+                "sha256:aa7ad2425e8020ff46a31633becfe1f3c64114498d964c536199f654b464e6bc",
+                "sha256:f7733dac1dcb07c89ff5ffde8452ee8d272be638defed855f4c48b2990ce5aa7"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.9'",
+            "version": "==3.1.5.20250306"
+        },
+        "types-requests": {
+            "hashes": [
+                "sha256:72ff80f84b15eb3aa7a8e2625fffb6a93f2ad5a0c20215fc1dcfa61117bcb2a2",
+                "sha256:c9e67228ea103bd811c96984fac36ed2ae8da87a36a633964a21f199d60baf32"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.9'",
+            "version": "==2.32.0.20250328"
+        },
+        "urllib3": {
+            "hashes": [
+                "sha256:414bc6535b787febd7567804cc015fee39daab8ad86268f1310a9250697de466",
+                "sha256:4e16665048960a0900c702d4a66415956a584919c03361cac9f1df5c5dd7e813"
+            ],
+            "markers": "python_version >= '3.9'",
+            "version": "==2.4.0"
+        }
+    }
 }
