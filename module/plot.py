@@ -15,7 +15,7 @@ matplotlib.use("Agg")
 
 plot_lock = Lock()
 
-def plot_short_selling(stock_number: int) -> None:
+def plot_short_selling(stock_number: str) -> None:
     with plot_lock:
         today:datetime = datetime.today()
 
