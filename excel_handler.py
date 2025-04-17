@@ -4,16 +4,37 @@ from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 # standard
-import datetime
+from datetime import datetime
 from os import path
-from typing import Union, cast
+from typing import Union, Optional, cast
+import traceback
+
+# self-define
+import utils
 
 class ExcelHandler:
+    # 0=stock_code, 1=YY-MM
+    FILE_PATH = path.join("C:/temp/stock-log", "{0}_{1}.xlsx")
+    INSTANCE_CACHE:dict = {}
 
-    @staticmethod
-    def check_or_create_file(file_path:str):
-        wb = openpyxl.load_workbook(file_path, data_only=True) if path.exists(file_path) else Workbook()
-        sheet:Worksheet = cast(Worksheet, wb.active)
+    def __init__(self, wb=Workbook, sheet=Worksheet):
+        self.wb = wb
+        self.sheet = sheet
+
+    @classmethod
+    @utils.tic_tok
+    @utils.handle_errors
+    def check_or_create_file(cls, stock_code:int) -> Optional[object]:
+        yy_mm = datetime.today().strftime('%Y-%m')
+        file_path = cls.FILE_PATH.format(stock_code, yy_mm)
+        
+        if cls.INSTANCE_CACHE.get(file_path, None) == None:
+            wb:Workbook = openpyxl.load_workbook(file_path, data_only=True) if path.exists(file_path) else Workbook()
+            sheet:Worksheet = cast(Worksheet, wb.active)
+            cls.INSTANCE_CACHE[file_path] = True
+            return cls(wb, sheet)
+        else:
+            return None
 
     @staticmethod
     def initialize_sheet():
@@ -34,6 +55,15 @@ class ExcelHandler:
     @staticmethod
     def save_file():
         pass
+
+if __name__ == "__main__":
+    try:
+        excel_2317 = ExcelHandler.check_or_create_file(2317)
+        excel_2330 = ExcelHandler.check_or_create_file(2317)
+        print(excel_2317, excel_2330)
+    except Exception as e:
+        traceback.print_exc()
+        print(e)
 
 # def save_to_excel(self) -> None:
 #     try:

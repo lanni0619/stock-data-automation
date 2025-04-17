@@ -51,7 +51,7 @@ def handle_errors(func: Callable) -> Callable:
             logger.error(f"[{func.__name__}] - Parsing error: {e}")
             raise(AttributeError(e))
         except Exception as e:
-            logger.error(f"[{func.__name__}]: {e}")
+            logger.error(f"[{func.__name__}] - Exception: {e}")
             raise(Exception(e))
             
     return wrapper
