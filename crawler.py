@@ -8,7 +8,7 @@ from typing import Union, cast
 
 # Custom module
 from logger import logger
-from utils import TicTok, handle_errors
+from utils import tic_tok, handle_errors
 
 class CrawlerConfig:
     BASE_URL = "https://tw.stock.yahoo.com/quote/{0}.TW"
@@ -29,10 +29,8 @@ class Crawler:
         response.raise_for_status()  # 檢查 HTTP 狀態碼
         return BeautifulSoup(response.text, "html5lib")
 
-
-class PriceCrawler:
     @staticmethod
-    @TicTok
+    @tic_tok
     @handle_errors
     def crawl_price(stock_code:int) -> str:
         url:str = CrawlerConfig.BASE_URL.format(stock_code)
@@ -42,14 +40,13 @@ class PriceCrawler:
 
         if isinstance(span_tag, Tag):
             price: str = span_tag.get_text()
-            logger.info(f"[{__name__}] - Get price = {price}")
+            logger.info(f"[crawl_price] - Get price = {price}")
             return price
         else:
             raise Exception(f"Fail to get {stock_code} price")
 
-class LendingCrawler:
     @staticmethod
-    @TicTok
+    @tic_tok
     @handle_errors
     def crawl_lending(stock_code:int) -> list[str]:
         url:str = CrawlerConfig.LENDING_URL
@@ -68,13 +65,14 @@ class LendingCrawler:
         for i in range(8, 13):
             results.append(cast(str, target_info[i].get_text()))  # 前日餘額
 
-        logger.info(f"[{__name__}] - Return {results}")
+        logger.info(f"[crawl_lending] - Return {results}")
         
         return results
-    
+
 if __name__ == "__main__":
     try:
-        PriceCrawler.crawl_price("2317")
+        Crawler.crawl_price(2317)
+        Crawler.crawl_lending(2317)
     except requests.exceptions.RequestException as e:
         logger.error(f"[{__name__}] Network error: {e}")
     except AttributeError as e:
