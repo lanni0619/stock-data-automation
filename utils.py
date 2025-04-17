@@ -1,12 +1,26 @@
+# 3rd party package
+import requests
+
 # Standard module
 import time
 from typing import Any, Callable
 from functools import wraps
-import requests
+import json
 
 # Custom module
 from logger import logger
 
+# ===== 工具函式 =====
+def json_stringify(obj: object) -> str:
+    #  https://stackoverflow.com/questions/7408647/convert-dynamic-python-object-to-json
+    return json.dumps(
+        obj,
+        default=lambda o: o.__dict__,
+        sort_keys=False,
+        indent=4
+    )
+
+# ===== 業務邏輯 =====
 def tic_tok(func: Callable) -> Callable:
     """It's a tic_tok function"""
     # position & keyword argument. The prefix star is meaning Any number.
@@ -15,7 +29,7 @@ def tic_tok(func: Callable) -> Callable:
         logger.info(f"[{func.__name__}] - arg={arg}, kwargs={kwargs}")
         result:Any = func(*arg, **kwargs)
         t2: float = time.time() - t1
-        logger.info(f"{func.__name__} took {round(t2, 3)} seconds")
+        logger.info(f"[{func.__name__}] took {round(t2, 3)} seconds")
         return result
     return wrapper
 
