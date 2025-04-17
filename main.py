@@ -1,4 +1,6 @@
 # Module
+import time
+
 from logger import logger
 from stock import Stock
 
@@ -32,8 +34,8 @@ def main() -> None:
 
     try:
          # 1) Preliminary
-        stock2317:Stock = Stock(2317).crawl_price()
-        stock2330:Stock = Stock(2330).crawl_price()
+        stock2317:Stock = Stock(2317)
+        stock2330:Stock = Stock(2330)
         
         stocks:dict = {2317: stock2317, 2330: stock2330}
 
@@ -46,6 +48,9 @@ def main() -> None:
     
     except Exception as e:
         logger.error(e)
+        logger.error("Something went wrong, restart after 1 min ...")
+        time.sleep(60)
+        main()
 
 
 if __name__ == "__main__":
