@@ -3,8 +3,10 @@ from datetime import datetime
 from typing import Optional
 
 # Self-define module
-import send2DC
+import utils
 from crawler import Crawler
+from dc_stock_channel import DcStockChannel
+from logger import logger
 
 class Stock:
     def __init__(self, stock_code: int):
@@ -29,7 +31,11 @@ class Stock:
         self.updatetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     def json2webhook(self) -> None:
-        send2DC.StockChannel.send_json(self)
+        if(utils.all_attrs_not_none(self)):
+            DcStockChannel.send_json(utils.json_stringify(self))
+            return
+        
+        logger.error(f"[{__name__}.json2webhook] - attrs have None")
 
 
 if __name__ == "__main__":

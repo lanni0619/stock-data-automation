@@ -14,8 +14,8 @@ from module.plot import plot_short_selling
 from logger import logger
 import utils
 
-# StockChannelCfg: Discord_Stock_Channel_Config
-class StockChannelCfg:
+# DcStockChannelCfg: Discord_Stock_Channel_Config
+class DcStockChannelCfg:
     BASE_URL:str = "https://discord.com/api/webhooks/1356484738029719573/9GNCPHfl7gcz9BpkkO1xYEYqZ9_D2tWd0dx5sZqx3RTN3HgLFLql47TEgWYEsz0Q4x8g"
     
     # SEND JSON, {0}=json_data
@@ -28,19 +28,14 @@ class StockChannelCfg:
     # {0}=stock_code, {1}=YY-MM
     IMG_PATH:str = f"C:/temp/stock-log/{0}_{1}.jpg"
 
-class StockChannel:
+class DcStockChannel:
     @staticmethod
     @utils.tic_tok
     @utils.handle_errors
-    def send_json(o) -> None:
-        if not all(getattr(o, attr) is not None for attr in vars(o)):
-            logger.error("[send_json] - data incomplete")
-            return None
-        
-        json_str:str = utils.json_stringify(o)
-        url = StockChannelCfg.BASE_URL
-        headers = StockChannelCfg.JSON_HEADERS
-        payload = StockChannelCfg.JSON_PAYLOAD
+    def send_json(json_str:str) -> None:
+        url = DcStockChannelCfg.BASE_URL
+        headers = DcStockChannelCfg.JSON_HEADERS
+        payload = DcStockChannelCfg.JSON_PAYLOAD
         payload["content"] = json_str
         
         # Send data to discord
@@ -92,4 +87,4 @@ if __name__ == "__main__":
     
     A = Person()
 
-    StockChannel.send_json(A)
+    DcStockChannel.send_json(utils.json_stringify(A))

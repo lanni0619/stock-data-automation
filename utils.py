@@ -11,6 +11,11 @@ import json
 from logger import logger
 
 # ===== 工具函式 =====
+def all_attrs_not_none (o: object) -> bool:
+    if not all(getattr(o, attr) is not None for attr in vars(o)):
+        return False
+    return True
+
 def json_stringify(obj: object) -> str:
     #  https://stackoverflow.com/questions/7408647/convert-dynamic-python-object-to-json
     return json.dumps(
