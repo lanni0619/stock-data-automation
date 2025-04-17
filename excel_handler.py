@@ -27,7 +27,7 @@ class ExcelHandler:
     def check_or_create_file(cls, stock_code:int) -> Optional[object]:
         yy_mm = datetime.today().strftime('%Y-%m')
         file_path = cls.FILE_PATH.format(stock_code, yy_mm)
-        
+
         if cls.INSTANCE_CACHE.get(file_path, None) == None:
             wb:Workbook = openpyxl.load_workbook(file_path, data_only=True) if path.exists(file_path) else Workbook()
             sheet:Worksheet = cast(Worksheet, wb.active)
@@ -58,9 +58,10 @@ class ExcelHandler:
 
 if __name__ == "__main__":
     try:
+        # Testing duplicate file
         excel_2317 = ExcelHandler.check_or_create_file(2317)
         excel_2330 = ExcelHandler.check_or_create_file(2317)
-        print(excel_2317, excel_2330)
+        print(excel_2317, excel_2330) # object, None
     except Exception as e:
         traceback.print_exc()
         print(e)
