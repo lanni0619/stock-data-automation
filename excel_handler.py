@@ -8,7 +8,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 # standard
 from datetime import datetime
 from os import path
-from typing import Optional, cast
+from typing import Optional, cast, Generator, Tuple
 import traceback
 
 # self-define
@@ -17,7 +17,7 @@ from logger import logger
 
 class ExcelHandler:
     # 0=stock_code, 1=YY-MM
-    FILE_PATH = path.join("C:/temp/stock-log", "{0}_{1}.xlsx")
+    FILE_PATH:str = path.join("C:/temp/stock-log", "{0}_{1}.xlsx")
     INSTANCE_CACHE:dict = {}
     HEADER_COLS:list[str] = ["created_at", "balance_yest", "selling_today", "return_today", "balance_today", "price"]
 
@@ -76,6 +76,28 @@ class ExcelHandler:
             self.sheet.append(new_row)
             self.wb.save(self.file_path)
 
+    def read_all_records(self) -> Tuple[list[str], list[list]]:
+        wb:Workbook = openpyxl.load_workbook(self.file_path)
+        sheet:Worksheet = cast(Worksheet, wb.active)
+
+        # Provide Plot class x, y axis
+        data_x:list[str] = []
+        data_y:list[list] = [[] for _ in range(2)] # [[], []]
+
+        # Access excel rows start from min_row
+        all_rows:Generator = sheet.iter_rows(min_row=2, values_only=True)
+
+        # row[0]=datetime, row[4]=short_selling, row[5]=price
+        # assign row[0] to data_x, row[4] to data_y[0], row[5] to data_y[1]
+        for row in all_rows:
+            # Convert (y-m-d H:M:S) to (m-d)
+            x_m_d:str = datetime.strptime(str(row[0]), "%Y-%m-%d %H:%M:%S").strftime("%m-%d")
+            data_x.append(x_m_d)
+            data_y[0].append(float(row[4]/1000/1000))
+            data_y[1].append(row[5])
+
+        return data_x, data_y
+
 if __name__ == "__main__":
     try:
         # 1) Testing duplicate file
@@ -85,6 +107,11 @@ if __name__ == "__main__":
 
         # 2) Testing _initialize_sheet() - Create a non-exist file
         # excel_2454 = ExcelHandler.create_file(2454)
+
+        # 3) Testing read_all_records()
+        x_2317, y_2317 = excel_2317.read_all_records()
+        print(x_2317)
+        print(y_2317)
 
     except Exception as e:
         traceback.print_exc()
