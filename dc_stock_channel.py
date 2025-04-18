@@ -45,8 +45,17 @@ class DcStockChannel:
     @staticmethod
     @utils.tic_tok
     @utils.handle_errors
-    def send_chart() -> None:
+    def send_chart(stock_code:str) -> None:
         pass
+
+    @staticmethod
+    def _is_file_exist(stock_code:str) -> bool:
+        yy_mm = datetime.now().strftime('%Y-%m')
+        img_file_path = DcStockChannelCfg.IMG_PATH.format(stock_code, yy_mm)
+        if not os.path.exists(img_file_path):
+            logger.info(f"[_is_file_exist] File not found: {stock_code}")
+            return False
+        return True
 
 # def send_chart(self) -> None:
 #     logger.info(f"send_chart - stock_number = {self._stock_code}")
