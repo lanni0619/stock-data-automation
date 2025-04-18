@@ -18,7 +18,7 @@ from logger import logger
 class ExcelHandler:
     # 0=stock_code, 1=YY-MM
     FILE_PATH:str = path.join("C:/temp/stock-log", "{0}_{1}.xlsx")
-    INSTANCE_CACHE:dict = {}
+    INSTANCE_CACHE:dict[str, Optional["ExcelHandler"]] = {}
     HEADER_COLS:list[str] = ["created_at", "balance_yest", "selling_today", "return_today", "balance_today", "price"]
 
     def __init__(self, wb:Workbook, sheet:Worksheet, file_path:str):
@@ -30,18 +30,23 @@ class ExcelHandler:
     @classmethod
     @utils.tic_tok
     @utils.handle_errors
-    def create_file(cls, stock_code:str) -> Optional[object]:
+    def create_file(cls, stock_code:str) -> "ExcelHandler":
         yy_mm = datetime.today().strftime('%Y-%m')
-        file_path = cls.FILE_PATH.format(stock_code, yy_mm)
+        file_path:str = cls.FILE_PATH.format(stock_code, yy_mm)
+        excel_handler = cls.INSTANCE_CACHE.get(file_path)
 
-        if not cls.INSTANCE_CACHE.get(file_path, None):
+        if excel_handler:
+            logger.warning("[save_to_excel] Duplicate create excel_handler")
+            return excel_handler
+        else:
+            logger.info("[save_to_excel] Create new excel_handler")
             wb:Workbook = openpyxl.load_workbook(file_path, data_only=True) if path.exists(file_path) else Workbook()
             sheet:Worksheet = cast(Worksheet, wb.active)
-            cls.INSTANCE_CACHE[file_path] = True
-            return cls(wb, sheet, file_path)
 
-        logger.warning("[save_to_excel] Duplicate create excel_handler")
-        return None
+            excel_handler = cls(wb, sheet, file_path)
+            cls.INSTANCE_CACHE[file_path] = excel_handler
+
+            return excel_handler
 
     def _initialize_sheet(self) -> None:
         if not path.exists(self.file_path):
@@ -76,6 +81,8 @@ class ExcelHandler:
             self.sheet.append(new_row)
             self.wb.save(self.file_path)
 
+    @utils.tic_tok
+    @utils.handle_errors
     def read_all_records(self) -> Tuple[list[str], list[list]]:
         wb:Workbook = openpyxl.load_workbook(self.file_path)
         sheet:Worksheet = cast(Worksheet, wb.active)
@@ -91,9 +98,9 @@ class ExcelHandler:
         # assign row[0] to data_x, row[4] to data_y[0], row[5] to data_y[1]
         for row in all_rows:
             # Convert (y-m-d H:M:S) to (m-d)
-            x_m_d:str = datetime.strptime(str(row[0]), "%Y-%m-%d %H:%M:%S").strftime("%m-%d")
+            x_m_d:str = str(row[0])[0:10]
             data_x.append(x_m_d)
-            data_y[0].append(float(row[4]/1000/1000))
+            data_y[0].append(float(row[4])/1000/1000)
             data_y[1].append(row[5])
 
         return data_x, data_y

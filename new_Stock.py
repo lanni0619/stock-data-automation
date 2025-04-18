@@ -8,9 +8,11 @@ from logger import logger
 from crawler import Crawler
 from dc_stock_channel import DcStockChannel
 from excel_handler import ExcelHandler
+from plot_handler import PlotHandler
 
 class Stock:
     def __init__(self, stock_code: int):
+        # variable
         self.stock_code:str = str(stock_code)
         self.price:Optional[str] = None
         self.balance_yest:Optional[str] = None
@@ -18,6 +20,8 @@ class Stock:
         self.return_today:Optional[str] = None
         self.balance_today:Optional[str] = None
         self.update_time:Optional[str] = None
+        # object
+        self.excel_handler:"ExcelHandler" = ExcelHandler.create_file(self.stock_code)
     
     def fetch_price(self) -> None:
         self.update_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -38,17 +42,28 @@ class Stock:
 
     def save_to_excel(self) -> None:
         # 1) Create ExcelHandler object
-        excel_handler:Optional[ExcelHandler] = ExcelHandler.create_file(self.stock_code)
         stock_dict = self.__dict__
 
         # 2) ExcelHandler.save_file(data:dict)
-        if excel_handler:
-            excel_handler.save_file(stock_dict)
-            return
+        self.excel_handler.save_file(stock_dict)
 
+    def plot_grid_price_ss(self) -> None:
+        """ price vs short selling"""
+        stock_dict = self.__dict__
+        # 1) Get x,y axis data
+        x, y = self.excel_handler.read_all_records()
+
+        # 2) Plot & save to local
+        PlotHandler.plot_grid(x, y, stock_dict)
 
 if __name__ == "__main__":
+    # 1) Testing crawl function
     stock2317 = Stock(2317)
     stock2317.fetch_price()
     stock2317.fetch_lending()
-    stock2317.save_to_excel()
+
+    # 2) Testing save file
+    # stock2317.save_to_excel()
+
+    # 3) Testing plot
+    stock2317.plot_grid_price_ss()
