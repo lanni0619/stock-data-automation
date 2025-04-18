@@ -40,7 +40,7 @@ class DcStockChannel:
         
         # Send data to discord
         res:Response = requests.post(url, headers = headers, json = payload)
-        logger.info("[send_json] - successfully")
+        logger.info("[send_json] successfully")
 
     @staticmethod
     @utils.tic_tok

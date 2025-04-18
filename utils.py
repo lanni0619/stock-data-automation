@@ -31,7 +31,7 @@ def tic_tok(func: Callable) -> Callable:
     # position & keyword argument. The prefix star is meaning Any number.
     def wrapper(*arg, **kwargs) -> Any:
         t1: float = time.time()
-        logger.info(f"[{func.__name__}] - arg={arg}, kwargs={kwargs}")
+        logger.info(f"[{func.__name__}] arg={arg}, kwargs={kwargs}")
         result:Any = func(*arg, **kwargs)
         t2: float = time.time() - t1
         logger.info(f"[{func.__name__}] took {round(t2, 3)} seconds")
@@ -45,13 +45,13 @@ def handle_errors(func: Callable) -> Callable:
             return func(*args, **kwargs)
 
         except requests.exceptions.RequestException as e:
-            logger.error(f"[{func.__name__}] - Network error: {e}")
+            logger.error(f"[{func.__name__}] Network error: {e}")
             raise(requests.exceptions.RequestException(e))
         except AttributeError as e:
-            logger.error(f"[{func.__name__}] - Parsing error: {e}")
+            logger.error(f"[{func.__name__}] Parsing error: {e}")
             raise(AttributeError(e))
         except Exception as e:
-            logger.error(f"[{func.__name__}] - Exception: {e}")
+            logger.error(f"[{func.__name__}] Exception: {e}")
             raise(Exception(e))
             
     return wrapper
@@ -66,7 +66,7 @@ class TicTok:
     
     def __call__(self, *args, **kwargs) -> Any:
         t1: float = time.time()
-        logger.info(f"[{self.func.__name__}] - args={args}, kwargs={kwargs}")
+        logger.info(f"[{self.func.__name__}] args={args}, kwargs={kwargs}")
         result:Any = self.func(*args, **kwargs)
         t2: float = time.time() - t1
         logger.info(f"{self.func.__name__} took {round(t2, 3)} seconds")

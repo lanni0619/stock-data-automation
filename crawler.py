@@ -4,7 +4,7 @@ from requests import Response
 from bs4 import BeautifulSoup, Tag, NavigableString, ResultSet
 
 # Standard module
-from typing import Union, cast
+from typing import Union, cast, Optional
 
 # Custom module
 from logger import logger
@@ -40,7 +40,7 @@ class Crawler:
 
         if isinstance(span_tag, Tag):
             price: str = span_tag.get_text()
-            logger.info(f"[crawl_price] - Get price = {price}")
+            logger.info(f"[crawl_price] Get price = {price}")
             return price
         else:
             raise Exception(f"Fail to get {stock_code} price")
@@ -60,12 +60,14 @@ class Crawler:
         for tr in trs:
             if tr.find('td').get_text() == str(stock_code):
                 target_info = tr.find_all('td')
+
+                for i in range(8, 13):
+                    temp_data = target_info[i].get_text().replace(',', '')
+                    results.append(cast(str, temp_data))
+
                 break
 
-        for i in range(8, 13):
-            results.append(cast(str, target_info[i].get_text()))  # 前日餘額
-
-        logger.info(f"[crawl_lending] - Return {results}")
+        logger.info(f"[crawl_lending] Return {results}")
         
         return results
 
