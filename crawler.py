@@ -32,7 +32,7 @@ class Crawler:
     @staticmethod
     @tic_tok
     @handle_errors
-    def crawl_price(stock_code:int) -> str:
+    def crawl_price(stock_code:str) -> str:
         url:str = CrawlerConfig.BASE_URL.format(stock_code)
         soup:BeautifulSoup = Crawler.fetch_html(url)
 

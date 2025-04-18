@@ -31,12 +31,10 @@ class Stock:
         self.balance_today = results[3]
         self.update_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
-    def json2webhook(self) -> None:
+    def json_to_dc_stock(self) -> None:
+        """ Send json to dc stock channel """
         if utils.all_attrs_not_none(self):
             DcStockChannel.send_json(utils.json_stringify(self))
-            return
-        
-        logger.error(f"[{__name__}.json2webhook] attrs have None")
 
     def save_to_excel(self) -> None:
         # 1) Create ExcelHandler object
@@ -47,8 +45,6 @@ class Stock:
         if excel_handler:
             excel_handler.save_file(stock_dict)
             return
-
-        logger.error("[save_to_excel] Fail to create excel_handler!")
 
 
 if __name__ == "__main__":

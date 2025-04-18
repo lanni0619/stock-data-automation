@@ -45,7 +45,7 @@ class DcStockChannel:
     @staticmethod
     @utils.tic_tok
     @utils.handle_errors
-    def send_chart():
+    def send_chart() -> None:
         pass
 
 # def send_chart(self) -> None:

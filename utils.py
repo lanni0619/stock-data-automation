@@ -13,6 +13,7 @@ from logger import logger
 # ===== 工具函式 =====
 def all_attrs_not_none (o: object) -> bool:
     if not all(getattr(o, attr) is not None for attr in vars(o)):
+        logger.warning(f"[all_attrs_not_none] attrs have None")
         return False
     return True
 
