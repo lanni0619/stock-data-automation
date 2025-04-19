@@ -7,8 +7,8 @@ from bs4 import BeautifulSoup, Tag, NavigableString, ResultSet
 from typing import Union, cast, Optional
 
 # Custom module
-from logger import logger
-from utils import tic_tok, handle_errors
+from module.logger import logger
+import module.utils as utils
 
 class CrawlerConfig:
     BASE_URL = "https://tw.stock.yahoo.com/quote/{0}.TW"
@@ -23,15 +23,16 @@ class CrawlerConfig:
 
 class Crawler:
     @staticmethod
-    @handle_errors
+    @utils.tic_tok
+    @utils.handle_errors
     def fetch_html(url: str) -> BeautifulSoup:
         response: Response = requests.get(url)
         response.raise_for_status()  # 檢查 HTTP 狀態碼
         return BeautifulSoup(response.text, "html5lib")
 
     @staticmethod
-    @tic_tok
-    @handle_errors
+    @utils.tic_tok
+    @utils.handle_errors
     def crawl_price(stock_code:str) -> str:
         url:str = CrawlerConfig.BASE_URL.format(stock_code)
         soup:BeautifulSoup = Crawler.fetch_html(url)
@@ -46,9 +47,9 @@ class Crawler:
             raise Exception(f"Fail to get {stock_code} price")
 
     @staticmethod
-    @tic_tok
-    @handle_errors
-    def crawl_lending(stock_code:int) -> list[str]:
+    @utils.tic_tok
+    @utils.handle_errors
+    def crawl_lending(stock_code:str) -> list[str]:
         url:str = CrawlerConfig.LENDING_URL
         web:Response = requests.get(url)
         soup:BeautifulSoup = BeautifulSoup(web.text, "html5lib")

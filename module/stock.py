@@ -17,7 +17,7 @@ from typing import Any, Callable, Optional, Union, cast
 
 # Custom module
 from module.plot import plot_short_selling
-from logger import logger
+from module.logger import logger
 
 def validate_stock_code(stock_code:int):
     if not isinstance(stock_code, int) or not (1101 <= stock_code <= 9958):

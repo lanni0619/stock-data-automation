@@ -1,8 +1,8 @@
 # Module
 import time
 
-from logger import logger
-from stock import Stock
+from module.logger import logger
+from module.stock import Stock
 
 def user_input_loop(stocks:dict) -> None:
     while True:

@@ -8,7 +8,7 @@ from functools import wraps
 import json
 
 # Custom module
-from logger import logger
+from module.logger import logger
 
 # ===== 工具函式 =====
 def all_attrs_not_none (o: object) -> bool:

@@ -3,12 +3,11 @@ from datetime import datetime
 from typing import Optional
 
 # Self-define module
-import utils
-from logger import logger
-from crawler import Crawler
-from dc_stock_channel import DcStockChannel
-from excel_handler import ExcelHandler
-from plot_handler import PlotHandler
+from module import utils
+from module.crawler import Crawler
+from module.dc_stock_channel import DcStockChannel
+from module.excel_handler import ExcelHandler
+from module.plot_handler import PlotHandler
 
 class Stock:
     def __init__(self, stock_code: int):
@@ -69,7 +68,7 @@ if __name__ == "__main__":
     stock2317.fetch_lending()
 
     # 2) Testing save file
-    # stock2317.save_to_excel()
+    stock2317.save_to_excel()
 
     # 3) Testing plot
     stock2317.plot_grid_price_ss()

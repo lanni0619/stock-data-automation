@@ -10,7 +10,7 @@ formatter = logging.Formatter(
     )
 
 # Create a file handler
-file_handler = logging.FileHandler("logfile.log", encoding="utf-8")
+file_handler = logging.FileHandler("../logfile.log", encoding="utf-8")
 file_handler.setLevel(logging.DEBUG)  # Set the file handler level
 file_handler.setFormatter(formatter)  # Attach the formatter to the file handler
 

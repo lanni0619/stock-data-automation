@@ -3,13 +3,10 @@ import matplotlib # type: ignore
 import matplotlib.pyplot as plt # type: ignore
 
 # Standard
-from datetime import datetime
 from os import path
-from threading import Lock
-from typing import cast, Generator
 
 # Self-define
-import utils
+import module.utils as utils
 
 matplotlib.use("Agg")
 

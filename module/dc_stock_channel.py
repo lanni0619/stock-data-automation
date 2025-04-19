@@ -4,15 +4,13 @@ from requests import Response
 # apscheduler don't have official stub
 
 # Standard module
-import json
 from datetime import datetime
 import os
-from typing import Any, Callable, Optional, Union, cast
+from typing import Optional
 
 # Custom module
-from module.plot import plot_short_selling
-from logger import logger
-import utils
+from module.logger import logger
+import module.utils as utils
 
 # Config: Discord_Stock_Channel_Config
 class Config:
