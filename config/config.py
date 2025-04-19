@@ -21,5 +21,5 @@ if __name__ == "__main__":
 
     stocks:dict = config.get("stock_code")
 
-    for index, key in enumerate(stocks):
-        print(key, stocks[key])
+    for index, k in enumerate(stocks):
+        print(k, stocks[k])

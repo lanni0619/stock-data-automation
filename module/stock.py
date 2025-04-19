@@ -3,11 +3,12 @@ from datetime import datetime
 from typing import Optional
 
 # Self-define module
-import utils
-from crawler import Crawler
-from dc_stock_channel import DcStockChannel
-from excel_handler import ExcelHandler
-from plot_handler import PlotHandler
+import module.utils as utils
+from module.crawler import Crawler
+from module.dc_stock_channel import DcStockChannel
+from module.excel_handler import ExcelHandler
+from module.plot_handler import PlotHandler
+from config.config import ConfigManager
 
 class Stock:
     def __init__(self, stock_code: int):
@@ -65,19 +66,26 @@ class Stock:
         DcStockChannel.send_image(self.stock_code)
 
 if __name__ == "__main__":
-    # 1) Testing crawl function
-    stock2317 = Stock(2317)
-    stock2317.fetch_price()
-    stock2317.fetch_lending()
+    config = ConfigManager()
 
-    # 2) Testing save file
-    stock2317.save_to_excel()
+    stocks_dict = config.get("stock_code")
 
-    # 3) Testing plot
-    stock2317.plot_grid_price_ss()
+    stocks:list["Stock"] = [Stock(stocks_dict[key]) for key in stocks_dict]
+    print(stocks)
 
-    # 4) send json
-    stock2317.json_to_dc_stock()
-
-    # 5) send image to dc channel
-    stock2317.image_to_dc_stock()
+    # # 1) Testing crawl function
+    # stock2317 = Stock(2317)
+    # stock2317.fetch_price()
+    # stock2317.fetch_lending()
+    #
+    # # 2) Testing save file
+    # stock2317.save_to_excel()
+    #
+    # # 3) Testing plot
+    # stock2317.plot_grid_price_ss()
+    #
+    # # 4) send json
+    # stock2317.json_to_dc_stock()
+    #
+    # # 5) send image to dc channel
+    # stock2317.image_to_dc_stock()

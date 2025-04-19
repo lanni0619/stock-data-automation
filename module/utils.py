@@ -8,7 +8,7 @@ from functools import wraps
 import json
 
 # Custom module
-from logger import logger
+from module.logger import logger
 
 # ===== 工具函式 =====
 def all_key_not_none (data: dict) -> bool:

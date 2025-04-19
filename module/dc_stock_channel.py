@@ -9,8 +9,8 @@ import os
 from typing import Optional
 
 # Custom module
-from logger import logger
-import utils
+from module.logger import logger
+import module.utils as utils
 
 
 # Config: Discord_Stock_Channel_Config

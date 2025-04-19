@@ -7,8 +7,8 @@ from bs4 import BeautifulSoup, Tag, NavigableString, ResultSet
 from typing import Union, cast, Optional
 
 # Custom module
-from logger import logger
-import utils
+from module.logger import logger
+import module.utils as utils
 
 class CrawlerConfig:
     BASE_URL = "https://tw.stock.yahoo.com/quote/{0}.TW"

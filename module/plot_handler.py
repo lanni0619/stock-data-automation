@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt # type: ignore
 from os import path
 
 # Self-define
-import utils
+import module.utils as utils
 
 matplotlib.use("Agg")
 
