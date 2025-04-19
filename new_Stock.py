@@ -44,7 +44,10 @@ class Stock:
         # 1) Create ExcelHandler object
         stock_dict = self.__dict__
 
-        # 2) ExcelHandler.save_file(data:dict)
+        # 2) Update Excel file
+        self.excel_handler = ExcelHandler.create_file(self.stock_code)
+
+        # 3) ExcelHandler.save_file(data:dict)
         self.excel_handler.save_file(stock_dict)
 
     def plot_grid_price_ss(self) -> None:
@@ -55,6 +58,9 @@ class Stock:
 
         # 2) Plot & save to local
         PlotHandler.plot_grid(x, y, stock_dict)
+
+    def image_to_dc_stock(self) -> None:
+        DcStockChannel.send_image(self.stock_code)
 
 if __name__ == "__main__":
     # 1) Testing crawl function
@@ -67,3 +73,6 @@ if __name__ == "__main__":
 
     # 3) Testing plot
     stock2317.plot_grid_price_ss()
+
+    # 4) send image to dc channel
+    stock2317.image_to_dc_stock()

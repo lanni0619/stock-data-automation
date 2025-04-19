@@ -2,7 +2,7 @@
 <project version="4">
   <component name="MypySettings">
     <option name="arguments" value="--follow-imports silent --exclude \.pyi$" />
-    <option name="mypyExecutable" value="C:\Users\parktron\AppData\Local\Programs\Python\Python39\Scripts\mypy.exe" />
+    <option name="mypyExecutable" value="C:\Users\sheng\.virtualenvs\stock-data-automation-GTw8eNj5\Scripts\mypy.exe" />
     <option name="projectDirectory" value="$PROJECT_DIR$" />
   </component>
 </project>

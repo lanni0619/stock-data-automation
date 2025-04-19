@@ -36,10 +36,10 @@ class ExcelHandler:
         excel_handler = cls.INSTANCE_CACHE.get(file_path)
 
         if excel_handler:
-            logger.warning("[save_to_excel] Duplicate create excel_handler")
+            logger.info("[create_file] ExcelHandler already exist!")
             return excel_handler
         else:
-            logger.info("[save_to_excel] Create new excel_handler")
+            logger.info("[create_file] Create new ExcelHandler")
             wb:Workbook = openpyxl.load_workbook(file_path, data_only=True) if path.exists(file_path) else Workbook()
             sheet:Worksheet = cast(Worksheet, wb.active)
 
