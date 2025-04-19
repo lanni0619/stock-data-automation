@@ -9,8 +9,9 @@ import os
 from typing import Optional
 
 # Custom module
-from module.logger import logger
-import module.utils as utils
+from logger import logger
+import utils
+
 
 # Config: Discord_Stock_Channel_Config
 class Config:
@@ -29,11 +30,12 @@ class DcStockChannel:
     @staticmethod
     @utils.tic_tok
     @utils.handle_errors
-    def send_json(json_str:str) -> None:
+    def send_json(o:dict) -> None:
         url = Config.BASE_URL
         headers = Config.JSON_HEADERS
         payload = Config.JSON_PAYLOAD
-        payload["content"] = json_str
+        o_json = utils.dict_to_json(o)
+        payload["content"] = o_json
         
         # Send data to discord
         res:Response = requests.post(url, headers = headers, json = payload)
@@ -63,14 +65,9 @@ class DcStockChannel:
         return img_file_path
 
 if __name__ == "__main__":
-    class Person:
-        def __init__(self):
-            self.name = "roy"
-            self.age = 100
-    
-    A = Person()
+    A = {"name":"roy", "age":100}
     # send_json
-    DcStockChannel.send_json(utils.json_stringify(A))
+    DcStockChannel.send_json(A)
 
     # send_image
     DcStockChannel.send_image("2317")

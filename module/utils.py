@@ -8,20 +8,20 @@ from functools import wraps
 import json
 
 # Custom module
-from module.logger import logger
+from logger import logger
 
 # ===== 工具函式 =====
-def all_attrs_not_none (o: object) -> bool:
-    if not all(getattr(o, attr) is not None for attr in vars(o)):
-        logger.warning(f"[all_attrs_not_none] attrs have None")
+def all_key_not_none (data: dict) -> bool:
+    if not all(data[key] is not None for key in data):
+        logger.warning(f"[all_key_not_none] Key have None value")
         return False
     return True
 
-def json_stringify(obj: object) -> str:
+def dict_to_json(data: dict) -> str:
     #  https://stackoverflow.com/questions/7408647/convert-dynamic-python-object-to-json
     return json.dumps(
-        obj,
-        default=lambda o: o.__dict__,
+        data,
+        # default=lambda o: o.__dict__,
         sort_keys=False,
         indent=4
     )
