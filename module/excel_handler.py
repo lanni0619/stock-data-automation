@@ -1,4 +1,5 @@
 # 3rd-party
+import os
 
 import openpyxl
 from openpyxl.workbook import Workbook
@@ -15,8 +16,9 @@ from module.logger import logger
 import module.utils as utils
 
 class ExcelHandler:
-    # 0=stock_code, 1=YY-MM
-    FILE_PATH:str = path.join("C:/temp/stock-log", "{0}_{1}.xlsx")
+    # 0=name_zh_tw 1=stock_code, 2=YY-MM
+    PATH_NAME:str = "C:/temp/stock-log/{0}"
+    FILE_NAME:str = "{0}_{1}.xlsx"
     INSTANCE_CACHE:dict[str, Optional["ExcelHandler"]] = {}
     HEADER_COLS:list[str] = ["created_at", "balance_yest", "selling_today", "return_today", "balance_today", "price"]
 
@@ -29,9 +31,15 @@ class ExcelHandler:
     @classmethod
     @utils.tic_tok
     @utils.handle_errors
-    def create_file(cls, stock_code:str) -> "ExcelHandler":
+    def create_file(cls, attrs:dict) -> "ExcelHandler":
         yy_mm = datetime.today().strftime('%Y-%m')
-        file_path:str = cls.FILE_PATH.format(stock_code, yy_mm)
+        path_name:str = cls.PATH_NAME.format(attrs.get("stock_code"))
+        file_name:str = cls.FILE_NAME.format(attrs.get("stock_code"), yy_mm)
+        file_path:str = path.join(path_name, file_name)
+
+        if not path.exists(path_name):
+            os.makedirs(path_name)
+
         excel_handler = cls.INSTANCE_CACHE.get(file_path)
 
         if excel_handler:

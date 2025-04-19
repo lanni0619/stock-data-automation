@@ -21,6 +21,7 @@ def dict_to_json(data: dict) -> str:
     #  https://stackoverflow.com/questions/7408647/convert-dynamic-python-object-to-json
     return json.dumps(
         data,
+        ensure_ascii=False,
         # default=lambda o: o.__dict__,
         sort_keys=False,
         indent=4

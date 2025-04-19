@@ -24,7 +24,7 @@ class Config:
     # SEND IMG
     IMG_PAYLOAD:dict = {"username": "newmanBot"}
     # {0}=stock_code, {1}=YY-MM
-    IMG_PATH:str = "C:/temp/stock-log/{0}_{1}.jpg"
+    IMG_PATH:str = "C:/temp/stock-log/{0}/{0}_{1}.jpg"
 
 class DcStockChannel:
     @staticmethod
