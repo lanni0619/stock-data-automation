@@ -10,5 +10,13 @@
     "國泰金": 2882,
     "聯電": 2303,
     "中華電": 2412
+  },
+  "excel_settings": {
+    "root_path": "C:/temp/stock-log/{0}",
+    "file_name": "{0}_{1}.xlsx"
+  },
+  "image_settings": {
+    "root_path": "C:/temp/stock-log/{0}",
+    "file_name": "{0}_{1}.jpg"
   }
 }

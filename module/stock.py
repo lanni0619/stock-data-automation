@@ -8,7 +8,7 @@ from module.crawler import Crawler
 from module.dc_stock_channel import DcStockChannel
 from module.excel_handler import ExcelHandler
 from module.plot_handler import PlotHandler
-from config.config import ConfigManager
+from config.config import config
 
 class Stock:
     def __init__(self, name:str, stock_code: int):
@@ -22,13 +22,13 @@ class Stock:
         self.balance_today:Optional[str] = None
         self.update_time:Optional[str] = None
         # object
-        self.attrs_dict = self._obj_to_dict()
-        self.excel_handler:"ExcelHandler" = ExcelHandler.create_file(self.attrs_dict)
+        self.info_dict = self._obj_to_dict()
+        self.excel_handler:"ExcelHandler" = ExcelHandler.create_file(self.info_dict)
 
     def _obj_to_dict(self) -> dict:
         data = vars(self).copy()
         data.pop("excel_handler", None)
-        data.pop("attrs_dict", None)
+        data.pop("info_dict", None)
         return data
 
     def fetch_price(self) -> None:
@@ -45,38 +45,35 @@ class Stock:
     
     def json_to_dc_stock(self) -> None:
         """ Send json to dc stock channel """
-        self.attrs_dict = self._obj_to_dict()
+        self.info_dict = self._obj_to_dict()
 
-        if utils.all_key_not_none(self.attrs_dict):
-            DcStockChannel.send_json(self.attrs_dict)
+        if utils.all_key_not_none(self.info_dict):
+            DcStockChannel.send_json(self.info_dict)
 
     def save_to_excel(self) -> None:
         # 1) Create ExcelHandler object
-        self.attrs_dict = self._obj_to_dict()
+        self.info_dict = self._obj_to_dict()
 
         # 2) Update Excel file
-        self.excel_handler = ExcelHandler.create_file(self.attrs_dict)
+        self.excel_handler = ExcelHandler.create_file(self.info_dict)
 
         # 3) ExcelHandler.save_file(data:dict)
-        self.excel_handler.save_file(self.attrs_dict)
+        self.excel_handler.save_file(self.info_dict)
 
     def plot_grid_price_ss(self) -> None:
         """ price vs short selling"""
-        self.attrs_dict = self._obj_to_dict()
+        self.info_dict = self._obj_to_dict()
         # 1) Get x,y axis data
         x, y = self.excel_handler.read_all_records()
 
         # 2) Plot & save to local
-        PlotHandler.plot_grid(x, y, self.attrs_dict)
+        PlotHandler.plot_grid(x, y, self.info_dict)
 
     def image_to_dc_stock(self) -> None:
         DcStockChannel.send_image(self.stock_code)
 
 if __name__ == "__main__":
-    config = ConfigManager()
-
     stocks_dict = config.get("stock_code")
-
     stocks:list["Stock"] = [Stock(key, stocks_dict[key]) for key in stocks_dict]
     print(stocks)
 

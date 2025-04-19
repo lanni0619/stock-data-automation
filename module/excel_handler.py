@@ -14,11 +14,12 @@ import traceback
 # self-define
 from module.logger import logger
 import module.utils as utils
+from config.config import config
 
 class ExcelHandler:
     # 0=name_zh_tw 1=stock_code, 2=YY-MM
-    PATH_NAME:str = "C:/temp/stock-log/{0}"
-    FILE_NAME:str = "{0}_{1}.xlsx"
+    PATH_NAME:str = config.get("excel_settings")["root_path"]
+    FILE_NAME:str = config.get("excel_settings")["file_name"]
     INSTANCE_CACHE:dict[str, Optional["ExcelHandler"]] = {}
     HEADER_COLS:list[str] = ["created_at", "balance_yest", "selling_today", "return_today", "balance_today", "price"]
 
@@ -31,10 +32,11 @@ class ExcelHandler:
     @classmethod
     @utils.tic_tok
     @utils.handle_errors
-    def create_file(cls, attrs:dict) -> "ExcelHandler":
+    def create_file(cls, info:dict) -> "ExcelHandler":
+        print(info)
         yy_mm = datetime.today().strftime('%Y-%m')
-        path_name:str = cls.PATH_NAME.format(attrs.get("stock_code"))
-        file_name:str = cls.FILE_NAME.format(attrs.get("stock_code"), yy_mm)
+        path_name:str = cls.PATH_NAME.format(info.get("stock_code"))
+        file_name:str = cls.FILE_NAME.format(info.get("stock_code"), yy_mm)
         file_path:str = path.join(path_name, file_name)
 
         if not path.exists(path_name):
@@ -115,17 +117,19 @@ class ExcelHandler:
 if __name__ == "__main__":
     try:
         # 1) Testing duplicate file
-        excel_2317 = ExcelHandler.create_file(2317)
-        excel_2330 = ExcelHandler.create_file(2317)
-        print(excel_2317, excel_2330) # object, None
+        test_info = {"stock_code":2317}
+        excel_2317 = ExcelHandler.create_file(test_info)
+        excel_2330 = ExcelHandler.create_file(test_info)
+        print(excel_2317 == excel_2330) # True
+        print(excel_2317.PATH_NAME)
 
         # 2) Testing _initialize_sheet() - Create a non-exist file
         # excel_2454 = ExcelHandler.create_file(2454)
 
         # 3) Testing read_all_records()
-        x_2317, y_2317 = excel_2317.read_all_records()
-        print(x_2317)
-        print(y_2317)
+        # x_2317, y_2317 = excel_2317.read_all_records()
+        # print(x_2317)
+        # print(y_2317)
 
     except Exception as e:
         traceback.print_exc()
