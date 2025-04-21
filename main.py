@@ -26,12 +26,18 @@ def stock_tasks(stocks_list:list["Stock"]) -> None:
         logger.info(f"[{stock.name_zh_tw}{stock.stock_code}] - Tasks are finished successfully")
 
 def main() -> None:
+    # Loading config stocks setting
     stocks_dict:dict = config.get("stock_code")
     stocks:list["Stock"] = [Stock(key, stocks_dict[key]) for key in stocks_dict]
-    hour:int = 19
-    minute:int = 52
-    sec:int = 00
-    day_of_week = "sat" # mon-fri
+
+    # Loading config schedule setting
+    schedule_setting = config.get("schedule_task")
+    hour:int = schedule_setting["hour"]
+    minute:int = schedule_setting["minute"]
+    sec:int = schedule_setting["sec"]
+    day_of_week = schedule_setting["day_of_week"]
+
+    logger.info(f"Stock tasks schedule at {hour}:{minute}:{sec}0 every {day_of_week}")
 
     scheduler.add_job(
         stock_tasks,
