@@ -40,7 +40,7 @@ class Stock:
         self.balance_yest = results[0]
         self.selling_today = results[1]
         self.return_today = results[2]
-        self.balance_today = results[3]
+        self.balance_today = results[4]
         self.update_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     def json_to_dc_stock(self) -> None:
@@ -73,20 +73,25 @@ class Stock:
         DcStockChannel.send_image(self.stock_code)
 
 if __name__ == "__main__":
-    stocks_dict = config.get("stock_code")
-    stocks:list["Stock"] = [Stock(key, stocks_dict[key]) for key in stocks_dict]
-    print(stocks)
+    # stocks_dict = config.get("stock_code")
+    # stocks:list["Stock"] = [Stock(key, stocks_dict[key]) for key in stocks_dict]
+    #
+    # for stock in stocks:
+    #     # stock.fetch_price()
+    #     stock.fetch_lending()
+    #     stock.save_to_excel()
+    #     stock.plot_grid_price_ss()
 
     # # 1) Testing crawl function
-    # stock2317 = Stock(2317)
+    stock2317 = Stock("鴻海",2317)
     # stock2317.fetch_price()
-    # stock2317.fetch_lending()
-    #
+    stock2317.fetch_lending()
+
     # # 2) Testing save file
     # stock2317.save_to_excel()
     #
     # # 3) Testing plot
-    # stock2317.plot_grid_price_ss()
+    stock2317.plot_grid_price_ss()
     #
     # # 4) send json
     # stock2317.json_to_dc_stock()

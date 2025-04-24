@@ -109,8 +109,8 @@ class ExcelHandler:
             # Convert (y-m-d H:M:S) to (m-d)
             x_m_d:str = str(row[0])[0:10]
             data_x.append(x_m_d)
-            data_y[0].append(float(row[4])/1000/1000)
-            data_y[1].append(row[5])
+            data_y[0].append((float(row[4])/1000/1000))
+            data_y[1].append(float(row[5]))
 
         return data_x, data_y
 
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     try:
         # 1) Testing duplicate file
         test_info = {"stock_code":2317}
-        excel_2317 = ExcelHandler.create_file(test_info)
+        excel_2317:"ExcelHandler" = ExcelHandler.create_file(test_info)
         excel_2330 = ExcelHandler.create_file(test_info)
         print(excel_2317 == excel_2330) # True
         print(excel_2317.PATH_NAME)
@@ -130,6 +130,9 @@ if __name__ == "__main__":
         # x_2317, y_2317 = excel_2317.read_all_records()
         # print(x_2317)
         # print(y_2317)
+
+        # 4) Save file stock_dict['selling_today'], stock_dict['return_today'], stock_dict['balance_today']
+        excel_2317.save_file({"update_time":"2025-04-22", "price":"136", "balance_yest":"1", "selling_today":"1","return_today":"1","balance_today":"1"})
 
     except Exception as e:
         traceback.print_exc()

@@ -36,7 +36,7 @@ def plot_short_selling(stock_number: str) -> None:
             month_day = date_obj.strftime("%m-%d")
 
             date_time.append(month_day)
-            data_series[0].append(float(row[4]/1000/1000))  # 第四欄數據是借券賣出餘額
+            data_series[0].append(round((row[4])))  # 第四欄數據是借券賣出餘額
             data_series[1].append(row[5])  # 第五欄數據是股價
 
         # 繪製圖表

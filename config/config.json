@@ -20,8 +20,8 @@
     "file_name": "{0}_{1}.jpg"
   },
   "schedule_task": {
-    "hour": 21,
-    "minute": 30,
+    "hour": 22,
+    "minute": 0,
     "sec": 0,
     "day_of_week": "mon-fri"
   }
