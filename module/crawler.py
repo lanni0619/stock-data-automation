@@ -40,7 +40,7 @@ class Crawler:
         span_tag:Union[Tag, NavigableString, None] = soup.find('span', class_=lambda x: x and any(el in x for el in CrawlerConfig.PRICE_CLASSES))
 
         if isinstance(span_tag, Tag):
-            price: str = span_tag.get_text()
+            price: str = span_tag.get_text().replace(",","")
             logger.info(f"[crawl_price] Get price = {price}")
             return price
         else:
@@ -74,7 +74,7 @@ class Crawler:
 
 if __name__ == "__main__":
     try:
-        Crawler.crawl_price(2317)
+        Crawler.crawl_price(2454)
         Crawler.crawl_lending(2317)
     except requests.exceptions.RequestException as e:
         logger.error(f"[{__name__}] Network error: {e}")
